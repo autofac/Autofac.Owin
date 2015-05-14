@@ -42,7 +42,7 @@ namespace Owin
     [EditorBrowsable(EditorBrowsableState.Never)]
     public static class OwinExtensions
     {
-        const string MiddlewareRegisteredKey = "AutofacMiddelwareRegistered";
+        static readonly string MiddlewareRegisteredKey = "AutofacMiddelwareRegistered:" + Constants.AutofacMiddlewareBoundary;
 
         /// <summary>
         /// Adds a component to the OWIN pipeline for using Autofac dependency injection with middleware.
