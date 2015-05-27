@@ -22,14 +22,23 @@
 // WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 // FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 // OTHER DEALINGS IN THE SOFTWARE.
+using System;
 
 namespace Autofac.Integration.Owin
 {
     static class Constants
     {
         /// <summary>
+        /// The AutofacMiddleware boundary.
+        /// </summary>
+        /// <remarks>
+        /// This boundary is used to isolate this AutofacMiddleware from other copies
+        /// on the same OWIN pipeline.
+        /// </remarks>
+        internal static readonly string AutofacMiddlewareBoundary = Guid.NewGuid().ToString();
+        /// <summary>
         /// The OWIN key for the current lifetime scope.
         /// </summary>
-        internal const string OwinLifetimeScopeKey = "autofac:OwinLifetimeScope";
+        internal static readonly string OwinLifetimeScopeKey = "autofac:OwinLifetimeScope:" + AutofacMiddlewareBoundary;
     }
 }
