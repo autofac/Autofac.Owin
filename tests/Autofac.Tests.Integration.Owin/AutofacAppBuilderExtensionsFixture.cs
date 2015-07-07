@@ -19,7 +19,8 @@ namespace Autofac.Tests.Integration.Owin
             var container = builder.Build();
             var app = new Mock<IAppBuilder>();
             app.Setup(mock => mock.Properties).Returns(new Dictionary<string, object>());
-            app.Setup(mock => mock.Use(typeof(AutofacMiddleware<TestMiddleware>)));
+			app.Setup(mock => mock.Use(typeof(AutofacMiddleware<TestMiddleware>)));
+			app.SetReturnsDefault(app.Object);
 
             OwinExtensions.UseAutofacMiddleware(app.Object, container);
 
