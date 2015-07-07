@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using Autofac.Core.Lifetime;
 using Autofac.Integration.Owin;
 using Microsoft.Owin.Testing;
@@ -22,7 +23,7 @@ namespace Autofac.Tests.Integration.Owin
 			app.Setup(mock => mock.Use(typeof(AutofacMiddleware<TestMiddleware>)));
 			app.SetReturnsDefault(app.Object);
 
-            OwinExtensions.UseAutofacMiddleware(app.Object, container);
+            app.Object.UseAutofacMiddleware(container);
 
             app.VerifyAll();
         }
@@ -44,5 +45,52 @@ namespace Autofac.Tests.Integration.Owin
                 Assert.That(TestMiddleware.LifetimeScope.Tag, Is.EqualTo(MatchingScopeLifetimeTags.RequestLifetimeScopeTag));
             }
         }
+
+		[Test]
+		public void UseAutofacLifetimeScopeInjectorDoesntAddWrappedMiddlewareInstancesToAppBuilder()
+		{
+			var builder = new ContainerBuilder();
+			builder.RegisterType<TestMiddleware>();
+			var container = builder.Build();
+			var app = new Mock<IAppBuilder>();
+			app.Setup(mock => mock.Properties).Returns(new Dictionary<string, object>());
+			app.SetReturnsDefault(app.Object);
+
+			app.Object.UseAutofacLifetimeScopeInjector(container);
+
+			app.Verify(mock => mock.Use(It.IsAny<AutofacMiddleware<TestMiddleware>>(), It.IsAny<object[]>()), Times.Never);
+		}
+
+		[Test]
+		public void UseAutofacLifetimeScopeInjectorAddsChildLifetimeScopeToOwinContext()
+		{
+			var builder = new ContainerBuilder();
+			builder.RegisterType<TestMiddleware>();
+			var container = builder.Build();
+
+			using (var server = TestServer.Create(app =>
+			{
+				app.UseAutofacLifetimeScopeInjector(container);
+				app.Use<TestMiddleware>();
+				app.Run(context => context.Response.WriteAsync("Hello, world!"));
+			}))
+			{
+				server.HttpClient.GetAsync("/").Wait();
+				Assert.That(TestMiddleware.LifetimeScope.Tag, Is.EqualTo(MatchingScopeLifetimeTags.RequestLifetimeScopeTag));
+			}
+		}
+
+		[Test]
+		public void UseMiddlewareFromContainerAddsSingleWrappedMiddlewareInstanceToAppBuilder()
+		{
+			var app = new Mock<IAppBuilder>();
+			app.Setup(mock => mock.Properties).Returns(new Dictionary<string, object>());
+			app.SetReturnsDefault(app.Object);
+
+			app.Object.UseMiddlewareFromContainer<TestMiddleware>();
+
+			app.Verify(mock => mock.Use(typeof(AutofacMiddleware<TestMiddleware>)), Times.Once);
+		}
+
     }
 }
