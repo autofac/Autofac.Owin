@@ -10,7 +10,7 @@ namespace Autofac.Integration.Owin.Test
     public class AutofacAppBuilderExtensionsFixture
     {
         [Fact]
-        public void UseAutofacLifetimeScopeInjectorAddsChildLifetimeScopeToOwinContext()
+        public async void UseAutofacLifetimeScopeInjectorAddsChildLifetimeScopeToOwinContext()
         {
             var builder = new ContainerBuilder();
             builder.RegisterType<TestMiddleware>();
@@ -23,7 +23,7 @@ namespace Autofac.Integration.Owin.Test
                     app.Run(context => context.Response.WriteAsync("Hello, world!"));
                 }))
             {
-                server.HttpClient.GetAsync("/").Wait();
+                await server.HttpClient.GetAsync("/");
                 Assert.Equal(MatchingScopeLifetimeTags.RequestLifetimeScopeTag, TestMiddleware.LifetimeScope.Tag);
             }
         }
@@ -44,7 +44,19 @@ namespace Autofac.Integration.Owin.Test
         }
 
         [Fact]
-        public void UseAutofacMiddlewareAddsChildLifetimeScopeToOwinContext()
+        public void UseAutofacLifetimeScopeInjectorShowsInjectorRegistered()
+        {
+            var app = new Mock<IAppBuilder>();
+            app.Setup(mock => mock.Properties).Returns(new Dictionary<string, object>());
+            app.SetReturnsDefault(app.Object);
+
+            var container = new ContainerBuilder().Build();
+            app.Object.UseAutofacLifetimeScopeInjector(container);
+            Assert.True(app.Object.IsAutofacLifetimeScopeInjectorRegistered());
+        }
+
+        [Fact]
+        public async void UseAutofacMiddlewareAddsChildLifetimeScopeToOwinContext()
         {
             var builder = new ContainerBuilder();
             builder.RegisterType<TestMiddleware>();
@@ -56,7 +68,7 @@ namespace Autofac.Integration.Owin.Test
                     app.Run(context => context.Response.WriteAsync("Hello, world!"));
                 }))
             {
-                server.HttpClient.GetAsync("/").Wait();
+                await server.HttpClient.GetAsync("/");
                 Assert.Equal(MatchingScopeLifetimeTags.RequestLifetimeScopeTag, TestMiddleware.LifetimeScope.Tag);
             }
         }
@@ -75,6 +87,18 @@ namespace Autofac.Integration.Owin.Test
             app.Object.UseAutofacMiddleware(container);
 
             app.VerifyAll();
+        }
+
+        [Fact]
+        public void UseAutofacMiddlewareShowsInjectorRegistered()
+        {
+            var app = new Mock<IAppBuilder>();
+            app.Setup(mock => mock.Properties).Returns(new Dictionary<string, object>());
+            app.SetReturnsDefault(app.Object);
+
+            var container = new ContainerBuilder().Build();
+            app.Object.UseAutofacMiddleware(container);
+            Assert.True(app.Object.IsAutofacLifetimeScopeInjectorRegistered());
         }
 
         [Fact]

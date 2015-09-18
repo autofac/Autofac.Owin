@@ -37,22 +37,89 @@ namespace Owin
     /// Extension methods for configuring Autofac within the OWIN pipeline.
     /// </summary>
     [EditorBrowsable(EditorBrowsableState.Never)]
-    public static class OwinExtensions
+    public static class AutofacAppBuilderExtensions
     {
         /// <summary>
-        /// Unique key used to indicate the middleware has been registered with the application.
+        /// Unique key used to indicate the middleware for injecting the request lifetime scope has been registered with the application.
         /// </summary>
-        private static readonly string MiddlewareRegisteredKey = "AutofacMiddelwareRegistered:" + Constants.AutofacMiddlewareBoundary;
+        private static readonly string InjectorRegisteredKey = "AutofacLifetimeScopeInjectorRegistered:" + Constants.AutofacMiddlewareBoundary;
 
         /// <summary>
-        /// Adds a middleware to inject request-scoped Autofac lifetime scope into the OWIN pipeline
+        /// Determines if the Autofac lifetime scope injector middleware is
+        /// registered with the application pipeline.
         /// </summary>
         /// <param name="app">The application builder.</param>
-        /// <param name="container">The Autofac application lifetime scope/container.</param>
+        /// <returns>
+        /// <see langword="true" /> if the Autofac lifetime scope injector has been registered
+        /// with the <paramref name="app" />; <see langword="false" /> if not.
+        /// </returns>
+        /// <exception cref="System.ArgumentNullException">
+        /// Thrown if <paramref name="app" /> is <see langword="null" />.
+        /// </exception>
+        /// <remarks>
+        /// <para>
+        /// This method is useful when composing an application where you may
+        /// accidentally register more than one Autofac lifetime scope injector
+        /// with the pipeline - for example, accidentally calling both
+        /// <see cref="UseAutofacMiddleware(IAppBuilder, ILifetimeScope)"/>
+        /// and <see cref="UseAutofacLifetimeScopeInjector(IAppBuilder, ILifetimeScope)"/>
+        /// on the same <see cref="IAppBuilder"/>. This allows you to check
+        /// an <see cref="IAppBuilder"/> and only add Autofac to the pipeline
+        /// if it hasn't already been registered.
+        /// </para>
+        /// </remarks>
+        public static bool IsAutofacLifetimeScopeInjectorRegistered(this IAppBuilder app)
+        {
+            if (app == null)
+            {
+                throw new ArgumentNullException("app");
+            }
+
+            return app.Properties.ContainsKey(InjectorRegisteredKey);
+        }
+
+        /// <summary>
+        /// Adds middleware to inject a request-scoped Autofac lifetime scope into the OWIN pipeline.
+        /// </summary>
+        /// <param name="app">The application builder.</param>
+        /// <param name="container">The root Autofac application lifetime scope/container.</param>
         /// <returns>The application builder.</returns>
         /// <exception cref="System.ArgumentNullException">
         /// Thrown if <paramref name="app" /> or <paramref name="container" /> is <see langword="null" />.
         /// </exception>
+        /// <remarks>
+        /// <para>
+        /// This extension is used when separating the notions of injecting the
+        /// lifetime scope and adding middleware to the pipeline from the container.
+        /// </para>
+        /// <para>
+        /// Since middleware registration order matters, generally you want the
+        /// Autofac request lifetime scope registered early in the pipeline, but
+        /// you may not want the middleware registered with Autofac added to the
+        /// pipeline until later.
+        /// </para>
+        /// <para>
+        /// This method gets used in conjunction with <see cref="UseMiddlewareFromContainer{T}(IAppBuilder)" />.
+        /// Do not use this with <see cref="UseAutofacMiddleware(IAppBuilder, ILifetimeScope)"/>
+        /// or you'll get unexpected results!
+        /// </para>
+        /// </remarks>
+        /// <example>
+        /// <code lang="C#">
+        /// app
+        ///   .UseAutofacLifetimeScopeInjector(container)
+        ///   .UseBasicAuthentication()
+        ///   .Use((c, next) =&gt;
+        ///   {
+        ///     //authorization
+        ///     return next();
+        ///   })
+        ///   .UseMiddlewareFromContainer&lt;PathRewriter&gt;()
+        ///   .UseSendFileFallback()
+        ///   .UseStaticFiles();
+        /// </code>
+        /// </example>
+        /// <seealso cref="UseMiddlewareFromContainer{T}(IAppBuilder)" />
         public static IAppBuilder UseAutofacLifetimeScopeInjector(this IAppBuilder app, ILifetimeScope container)
         {
             if (app == null)
@@ -65,26 +132,51 @@ namespace Owin
                 throw new ArgumentNullException("container");
             }
 
-            if (app.Properties.ContainsKey(MiddlewareRegisteredKey))
+            if (app.Properties.ContainsKey(InjectorRegisteredKey))
             {
                 return app;
             }
 
-            app.RegisterAutofacLifetimeScopeInjector(container);
-            app.Properties.Add(MiddlewareRegisteredKey, true);
-
-            return app;
+            return app.RegisterAutofacLifetimeScopeInjector(container);
         }
 
         /// <summary>
-        /// Adds a component to the OWIN pipeline for using Autofac dependency injection with middleware.
+        /// Adds middleware to both inject a request-scoped Autofac lifetime scope into the OWIN pipeline
+        /// as well as add all middleware components registered with Autofac.
         /// </summary>
         /// <param name="app">The application builder.</param>
-        /// <param name="container">The Autofac application lifetime scope/container.</param>
+        /// <param name="container">The root Autofac application lifetime scope/container.</param>
         /// <returns>The application builder.</returns>
         /// <exception cref="System.ArgumentNullException">
         /// Thrown if <paramref name="app" /> or <paramref name="container" /> is <see langword="null" />.
         /// </exception>
+        /// <remarks>
+        /// <para>
+        /// This extension registers the Autofac lifetime scope and all Autofac-registered
+        /// middleware into the application at the same time. This is the simplest
+        /// way to integrate Autofac into OWIN but has the least control over
+        /// pipeline construction.
+        /// </para>
+        /// <para>
+        /// Do not use this with <see cref="UseAutofacLifetimeScopeInjector(IAppBuilder, ILifetimeScope)"/>
+        /// or <see cref="UseMiddlewareFromContainer{T}(IAppBuilder)"/>
+        /// or you'll get unexpected results!
+        /// </para>
+        /// </remarks>
+        /// <example>
+        /// <code lang="C#">
+        /// app
+        ///   .UseAutofacMiddleware(container)
+        ///   .UseBasicAuthentication()
+        ///   .Use((c, next) =&gt;
+        ///   {
+        ///     //authorization
+        ///     return next();
+        ///   })
+        ///   .UseSendFileFallback()
+        ///   .UseStaticFiles();
+        /// </code>
+        /// </example>
         public static IAppBuilder UseAutofacMiddleware(this IAppBuilder app, ILifetimeScope container)
         {
             if (app == null)
@@ -97,18 +189,14 @@ namespace Owin
                 throw new ArgumentNullException("container");
             }
 
-            if (app.Properties.ContainsKey(MiddlewareRegisteredKey))
+            if (app.Properties.ContainsKey(InjectorRegisteredKey))
             {
                 return app;
             }
 
-            app
+            return app
                 .RegisterAutofacLifetimeScopeInjector(container)
-                .UseMiddlewareFromContainer(container);
-
-            app.Properties.Add(MiddlewareRegisteredKey, true);
-
-            return app;
+                .UseAllMiddlewareRegisteredInContainer(container);
         }
 
         /// <summary>
@@ -116,6 +204,42 @@ namespace Owin
         /// </summary>
         /// <param name="app">The application builder.</param>
         /// <returns>The application builder.</returns>
+        /// <exception cref="System.ArgumentNullException">
+        /// Thrown if <paramref name="app" /> is <see langword="null" />.
+        /// </exception>
+        /// <remarks>
+        /// <para>
+        /// This extension is used when separating the notions of injecting the
+        /// lifetime scope and adding middleware to the pipeline from the container.
+        /// </para>
+        /// <para>
+        /// Since middleware registration order matters, generally you want the
+        /// Autofac request lifetime scope registered early in the pipeline, but
+        /// you may not want the middleware registered with Autofac added to the
+        /// pipeline until later.
+        /// </para>
+        /// <para>
+        /// This method gets used in conjunction with <see cref="UseAutofacLifetimeScopeInjector(IAppBuilder, ILifetimeScope)" />.
+        /// Do not use this with <see cref="UseAutofacMiddleware(IAppBuilder, ILifetimeScope)"/>
+        /// or you'll get unexpected results!
+        /// </para>
+        /// </remarks>
+        /// <example>
+        /// <code lang="C#">
+        /// app
+        ///   .UseAutofacLifetimeScopeInjector(container)
+        ///   .UseBasicAuthentication()
+        ///   .Use((c, next) =&gt;
+        ///   {
+        ///     //authorization
+        ///     return next();
+        ///   })
+        ///   .UseMiddlewareFromContainer&lt;PathRewriter&gt;()
+        ///   .UseSendFileFallback()
+        ///   .UseStaticFiles();
+        /// </code>
+        /// </example>
+        /// <seealso cref="UseAutofacLifetimeScopeInjector(IAppBuilder, ILifetimeScope)" />
         public static IAppBuilder UseMiddlewareFromContainer<T>(this IAppBuilder app)
             where T : OwinMiddleware
         {
@@ -129,7 +253,7 @@ namespace Owin
 
         private static IAppBuilder RegisterAutofacLifetimeScopeInjector(this IAppBuilder app, ILifetimeScope container)
         {
-            return app.Use(async (context, next) =>
+            app.Use(async (context, next) =>
                 {
                     using (var lifetimeScope = container.BeginLifetimeScope(MatchingScopeLifetimeTags.RequestLifetimeScopeTag,
                     b => b.RegisterInstance(context).As<IOwinContext>()))
@@ -138,9 +262,12 @@ namespace Owin
                         await next();
                     }
                 });
+
+            app.Properties.Add(InjectorRegisteredKey, true);
+            return app;
         }
 
-        private static IAppBuilder UseMiddlewareFromContainer(this IAppBuilder app, IComponentContext container)
+        private static IAppBuilder UseAllMiddlewareRegisteredInContainer(this IAppBuilder app, IComponentContext container)
         {
             var services = container.ComponentRegistry.Registrations.SelectMany(r => r.Services)
                 .OfType<TypedService>()
