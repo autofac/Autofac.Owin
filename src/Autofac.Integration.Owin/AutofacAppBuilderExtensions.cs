@@ -58,63 +58,63 @@ namespace Owin
             if (app.Properties.ContainsKey(MiddlewareRegisteredKey)) return app;
 
             app
-				.RegisterAutofacLifetimeScopeInjector(container)
-				.UseMiddlewareFromContainer(container);
+                .RegisterAutofacLifetimeScopeInjector(container)
+                .UseMiddlewareFromContainer(container);
 
             app.Properties.Add(MiddlewareRegisteredKey, true);
 
             return app;
         }
 
-		/// <summary>
-		/// Adds a middleware to inject request-scoped Autofac lifetime scope into the OWIN pipeline 
-		/// </summary>
-		/// <param name="app">The application builder.</param>
-		/// <param name="container">The Autofac application lifetime scope/container.</param>
-		/// <returns>The application builder.</returns>
-		[SecuritySafeCritical]
-		public static IAppBuilder UseAutofacLifetimeScopeInjector(this IAppBuilder app, ILifetimeScope container)
-		{
-			if (app == null) throw new ArgumentNullException("app");
+        /// <summary>
+        /// Adds a middleware to inject request-scoped Autofac lifetime scope into the OWIN pipeline 
+        /// </summary>
+        /// <param name="app">The application builder.</param>
+        /// <param name="container">The Autofac application lifetime scope/container.</param>
+        /// <returns>The application builder.</returns>
+        [SecuritySafeCritical]
+        public static IAppBuilder UseAutofacLifetimeScopeInjector(this IAppBuilder app, ILifetimeScope container)
+        {
+            if (app == null) throw new ArgumentNullException("app");
 
-			if (app.Properties.ContainsKey(MiddlewareRegisteredKey)) return app;
+            if (app.Properties.ContainsKey(MiddlewareRegisteredKey)) return app;
 
-			app.RegisterAutofacLifetimeScopeInjector(container);
+            app.RegisterAutofacLifetimeScopeInjector(container);
 
-			app.Properties.Add(MiddlewareRegisteredKey, true);
+            app.Properties.Add(MiddlewareRegisteredKey, true);
 
-			return app;
-		}
+            return app;
+        }
 
-		/// <summary>
-		/// Adds a middleware to the OWIN pipeline that will be constructed using Autofac
-		/// </summary>
-		/// <param name="app">The application builder.</param>
-		/// <returns>The application builder.</returns>
-		[SecuritySafeCritical]
-		public static IAppBuilder UseMiddlewareFromContainer<T>(this IAppBuilder app) where T : OwinMiddleware
-		{
-			if (app == null) throw new ArgumentNullException("app");
+        /// <summary>
+        /// Adds a middleware to the OWIN pipeline that will be constructed using Autofac
+        /// </summary>
+        /// <param name="app">The application builder.</param>
+        /// <returns>The application builder.</returns>
+        [SecuritySafeCritical]
+        public static IAppBuilder UseMiddlewareFromContainer<T>(this IAppBuilder app) where T : OwinMiddleware
+        {
+            if (app == null) throw new ArgumentNullException("app");
 
-			return app.Use<AutofacMiddleware<T>>();
-		}
+            return app.Use<AutofacMiddleware<T>>();
+        }
 
 
-		[SecuritySafeCritical]
-		static IAppBuilder RegisterAutofacLifetimeScopeInjector(this IAppBuilder app, ILifetimeScope container)
-	    {
-		    return app.Use(async (context, next) =>
-		    {
-			    using (var lifetimeScope = container.BeginLifetimeScope(MatchingScopeLifetimeTags.RequestLifetimeScopeTag,
-				    b => b.RegisterInstance(context).As<IOwinContext>()))
-			    {
-				    context.Set(Constants.OwinLifetimeScopeKey, lifetimeScope);
-				    await next();
-			    }
-		    });
-	    }
+        [SecuritySafeCritical]
+        static IAppBuilder RegisterAutofacLifetimeScopeInjector(this IAppBuilder app, ILifetimeScope container)
+        {
+            return app.Use(async (context, next) =>
+            {
+                using (var lifetimeScope = container.BeginLifetimeScope(MatchingScopeLifetimeTags.RequestLifetimeScopeTag,
+                    b => b.RegisterInstance(context).As<IOwinContext>()))
+                {
+                    context.Set(Constants.OwinLifetimeScopeKey, lifetimeScope);
+                    await next();
+                }
+            });
+        }
 
-	    [SecuritySafeCritical]
+        [SecuritySafeCritical]
         static IAppBuilder UseMiddlewareFromContainer(this IAppBuilder app, IComponentContext container)
         {
             var services = container.ComponentRegistry.Registrations.SelectMany(r => r.Services)
@@ -129,7 +129,7 @@ namespace Owin
             foreach (var typedService in typedServices)
                 app.Use(typedService);
 
-		    return app;
+            return app;
         }
     }
 }

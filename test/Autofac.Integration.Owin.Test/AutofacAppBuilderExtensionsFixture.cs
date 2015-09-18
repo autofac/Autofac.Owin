@@ -7,7 +7,7 @@ using Moq;
 using NUnit.Framework;
 using Owin;
 
-namespace Autofac.Tests.Integration.Owin
+namespace Autofac.Integration.Owin.Test
 {
     [TestFixture]
     public class AutofacAppBuilderExtensionsFixture
