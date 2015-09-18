@@ -23,24 +23,26 @@
 // FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 // OTHER DEALINGS IN THE SOFTWARE.
 
-using System.Security;
 using System.Threading.Tasks;
 using Microsoft.Owin;
 
 namespace Autofac.Integration.Owin
 {
-    [SecurityCritical]
-    class AutofacMiddleware<T> : OwinMiddleware where T : OwinMiddleware
+    internal class AutofacMiddleware<T> : OwinMiddleware
+        where T : OwinMiddleware
     {
-        public AutofacMiddleware(OwinMiddleware next) : base(next)
+        public AutofacMiddleware(OwinMiddleware next)
+            : base(next)
         {
         }
 
-        [SecurityCritical]
         public override Task Invoke(IOwinContext context)
         {
             var lifetimeScope = context.GetAutofacLifetimeScope();
-            if (lifetimeScope == null) return Next.Invoke(context);
+            if (lifetimeScope == null)
+            {
+                return Next.Invoke(context);
+            }
 
             var middleware = lifetimeScope.ResolveOptional<T>(TypedParameter.From(Next));
             return middleware != null ? middleware.Invoke(context) : Next.Invoke(context);

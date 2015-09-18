@@ -1,6 +1,4 @@
-﻿using System.Security;
-using System.Threading.Tasks;
-using Autofac.Integration.Owin;
+﻿using System.Threading.Tasks;
 using Microsoft.Owin;
 
 namespace Autofac.Integration.Owin.Test
@@ -15,7 +13,6 @@ namespace Autofac.Integration.Owin.Test
 
         public static ILifetimeScope LifetimeScope { get; set; }
 
-        [SecurityCritical]
         public override Task Invoke(IOwinContext context)
         {
             LifetimeScope = context.GetAutofacLifetimeScope();

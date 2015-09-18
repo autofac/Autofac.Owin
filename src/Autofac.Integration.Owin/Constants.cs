@@ -36,6 +36,7 @@ namespace Autofac.Integration.Owin
         /// on the same OWIN pipeline.
         /// </remarks>
         internal static readonly string AutofacMiddlewareBoundary = Guid.NewGuid().ToString();
+
         /// <summary>
         /// The OWIN key for the current lifetime scope.
         /// </summary>

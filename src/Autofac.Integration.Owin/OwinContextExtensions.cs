@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Security;
 using Microsoft.Owin;
 
 namespace Autofac.Integration.Owin
@@ -14,10 +13,15 @@ namespace Autofac.Integration.Owin
         /// </summary>
         /// <param name="context">The OWIN context.</param>
         /// <returns>The current lifetime scope.</returns>
-        [SecuritySafeCritical]
+        /// <exception cref="System.ArgumentNullException">
+        /// Thrown if <paramref name="context" /> is <see langword="null" />.
+        /// </exception>
         public static ILifetimeScope GetAutofacLifetimeScope(this IOwinContext context)
         {
-            if (context == null) throw new ArgumentNullException("context");
+            if (context == null)
+            {
+                throw new ArgumentNullException("context");
+            }
 
             return context.Get<ILifetimeScope>(Constants.OwinLifetimeScopeKey);
         }

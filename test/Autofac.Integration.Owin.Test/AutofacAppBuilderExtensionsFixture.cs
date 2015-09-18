@@ -1,7 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using Autofac.Core.Lifetime;
-using Autofac.Integration.Owin;
 using Microsoft.Owin.Testing;
 using Moq;
 using NUnit.Framework;
@@ -13,19 +11,37 @@ namespace Autofac.Integration.Owin.Test
     public class AutofacAppBuilderExtensionsFixture
     {
         [Test]
-        public void UseAutofacMiddlewareAddsWrappedMiddlewareInstancesToAppBuilder()
+        public void UseAutofacLifetimeScopeInjectorAddsChildLifetimeScopeToOwinContext()
+        {
+            var builder = new ContainerBuilder();
+            builder.RegisterType<TestMiddleware>();
+            var container = builder.Build();
+
+            using (var server = TestServer.Create(app =>
+                {
+                    app.UseAutofacLifetimeScopeInjector(container);
+                    app.Use<TestMiddleware>();
+                    app.Run(context => context.Response.WriteAsync("Hello, world!"));
+                }))
+            {
+                server.HttpClient.GetAsync("/").Wait();
+                Assert.That(TestMiddleware.LifetimeScope.Tag, Is.EqualTo(MatchingScopeLifetimeTags.RequestLifetimeScopeTag));
+            }
+        }
+
+        [Test]
+        public void UseAutofacLifetimeScopeInjectorDoesntAddWrappedMiddlewareInstancesToAppBuilder()
         {
             var builder = new ContainerBuilder();
             builder.RegisterType<TestMiddleware>();
             var container = builder.Build();
             var app = new Mock<IAppBuilder>();
             app.Setup(mock => mock.Properties).Returns(new Dictionary<string, object>());
-			app.Setup(mock => mock.Use(typeof(AutofacMiddleware<TestMiddleware>)));
-			app.SetReturnsDefault(app.Object);
+            app.SetReturnsDefault(app.Object);
 
-            app.Object.UseAutofacMiddleware(container);
+            app.Object.UseAutofacLifetimeScopeInjector(container);
 
-            app.VerifyAll();
+            app.Verify(mock => mock.Use(It.IsAny<AutofacMiddleware<TestMiddleware>>(), It.IsAny<object[]>()), Times.Never);
         }
 
         [Test]
@@ -36,61 +52,42 @@ namespace Autofac.Integration.Owin.Test
             var container = builder.Build();
 
             using (var server = TestServer.Create(app =>
-            {
-                app.UseAutofacMiddleware(container);
-                app.Run(context => context.Response.WriteAsync("Hello, world!"));
-            }))
+                {
+                    app.UseAutofacMiddleware(container);
+                    app.Run(context => context.Response.WriteAsync("Hello, world!"));
+                }))
             {
                 server.HttpClient.GetAsync("/").Wait();
                 Assert.That(TestMiddleware.LifetimeScope.Tag, Is.EqualTo(MatchingScopeLifetimeTags.RequestLifetimeScopeTag));
             }
         }
 
-		[Test]
-		public void UseAutofacLifetimeScopeInjectorDoesntAddWrappedMiddlewareInstancesToAppBuilder()
-		{
-			var builder = new ContainerBuilder();
-			builder.RegisterType<TestMiddleware>();
-			var container = builder.Build();
-			var app = new Mock<IAppBuilder>();
-			app.Setup(mock => mock.Properties).Returns(new Dictionary<string, object>());
-			app.SetReturnsDefault(app.Object);
+        [Test]
+        public void UseAutofacMiddlewareAddsWrappedMiddlewareInstancesToAppBuilder()
+        {
+            var builder = new ContainerBuilder();
+            builder.RegisterType<TestMiddleware>();
+            var container = builder.Build();
+            var app = new Mock<IAppBuilder>();
+            app.Setup(mock => mock.Properties).Returns(new Dictionary<string, object>());
+            app.Setup(mock => mock.Use(typeof(AutofacMiddleware<TestMiddleware>)));
+            app.SetReturnsDefault(app.Object);
 
-			app.Object.UseAutofacLifetimeScopeInjector(container);
+            app.Object.UseAutofacMiddleware(container);
 
-			app.Verify(mock => mock.Use(It.IsAny<AutofacMiddleware<TestMiddleware>>(), It.IsAny<object[]>()), Times.Never);
-		}
+            app.VerifyAll();
+        }
 
-		[Test]
-		public void UseAutofacLifetimeScopeInjectorAddsChildLifetimeScopeToOwinContext()
-		{
-			var builder = new ContainerBuilder();
-			builder.RegisterType<TestMiddleware>();
-			var container = builder.Build();
+        [Test]
+        public void UseMiddlewareFromContainerAddsSingleWrappedMiddlewareInstanceToAppBuilder()
+        {
+            var app = new Mock<IAppBuilder>();
+            app.Setup(mock => mock.Properties).Returns(new Dictionary<string, object>());
+            app.SetReturnsDefault(app.Object);
 
-			using (var server = TestServer.Create(app =>
-			{
-				app.UseAutofacLifetimeScopeInjector(container);
-				app.Use<TestMiddleware>();
-				app.Run(context => context.Response.WriteAsync("Hello, world!"));
-			}))
-			{
-				server.HttpClient.GetAsync("/").Wait();
-				Assert.That(TestMiddleware.LifetimeScope.Tag, Is.EqualTo(MatchingScopeLifetimeTags.RequestLifetimeScopeTag));
-			}
-		}
+            app.Object.UseMiddlewareFromContainer<TestMiddleware>();
 
-		[Test]
-		public void UseMiddlewareFromContainerAddsSingleWrappedMiddlewareInstanceToAppBuilder()
-		{
-			var app = new Mock<IAppBuilder>();
-			app.Setup(mock => mock.Properties).Returns(new Dictionary<string, object>());
-			app.SetReturnsDefault(app.Object);
-
-			app.Object.UseMiddlewareFromContainer<TestMiddleware>();
-
-			app.Verify(mock => mock.Use(typeof(AutofacMiddleware<TestMiddleware>)), Times.Once);
-		}
-
+            app.Verify(mock => mock.Use(typeof(AutofacMiddleware<TestMiddleware>)), Times.Once);
+        }
     }
 }

@@ -1,5 +1,4 @@
 ﻿using System;
-using Autofac.Integration.Owin;
 using Microsoft.Owin;
 using Moq;
 using NUnit.Framework;
