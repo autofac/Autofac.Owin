@@ -23,7 +23,11 @@
 // FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 // OTHER DEALINGS IN THE SOFTWARE.
 
+using System;
+using System.Globalization;
 using System.Threading.Tasks;
+using Autofac.Core;
+using Autofac.Integration.Owin.Properties;
 using Microsoft.Owin;
 
 namespace Autofac.Integration.Owin
@@ -41,11 +45,22 @@ namespace Autofac.Integration.Owin
             var lifetimeScope = context.GetAutofacLifetimeScope();
             if (lifetimeScope == null)
             {
-                return Next.Invoke(context);
+                // We pretty well protect against this, but just in case
+                // someone's trying to pull a fast one...
+                throw new InvalidOperationException(String.Format(CultureInfo.InvariantCulture, Resources.LifetimeScopeNotFoundWhileInjectingMiddleware, typeof(T)));
             }
 
-            var middleware = lifetimeScope.ResolveOptional<T>(TypedParameter.From(Next));
-            return middleware != null ? middleware.Invoke(context) : Next.Invoke(context);
+            T middleware;
+            try
+            {
+                middleware = lifetimeScope.Resolve<T>(TypedParameter.From(this.Next));
+            }
+            catch (DependencyResolutionException ex)
+            {
+                throw new InvalidOperationException(String.Format(CultureInfo.InvariantCulture, Resources.MiddlewareNotRegistered, typeof(T)), ex);
+            }
+
+            return middleware.Invoke(context);
         }
     }
 }

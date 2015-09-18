@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using Autofac.Core.Lifetime;
 using Microsoft.Owin.Testing;
 using Moq;
@@ -108,9 +109,21 @@ namespace Autofac.Integration.Owin.Test
             app.Setup(mock => mock.Properties).Returns(new Dictionary<string, object>());
             app.SetReturnsDefault(app.Object);
 
+            var container = new ContainerBuilder().Build();
+            app.Object.UseAutofacLifetimeScopeInjector(container);
             app.Object.UseMiddlewareFromContainer<TestMiddleware>();
 
             app.Verify(mock => mock.Use(typeof(AutofacMiddleware<TestMiddleware>)), Times.Once);
+        }
+
+        [Fact]
+        public void UseMiddlewareFromContainerRequiresInjectorRegistrationFirst()
+        {
+            var app = new Mock<IAppBuilder>();
+            app.Setup(mock => mock.Properties).Returns(new Dictionary<string, object>());
+            app.SetReturnsDefault(app.Object);
+
+            Assert.Throws<InvalidOperationException>(() => app.Object.UseMiddlewareFromContainer<TestMiddleware>());
         }
     }
 }

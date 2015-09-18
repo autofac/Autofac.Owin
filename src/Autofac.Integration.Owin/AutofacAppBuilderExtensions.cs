@@ -24,11 +24,13 @@
 // OTHER DEALINGS IN THE SOFTWARE.
 using System;
 using System.ComponentModel;
+using System.Globalization;
 using System.Linq;
 using Autofac;
 using Autofac.Core;
 using Autofac.Core.Lifetime;
 using Autofac.Integration.Owin;
+using Autofac.Integration.Owin.Properties;
 using Microsoft.Owin;
 
 namespace Owin
@@ -236,6 +238,11 @@ namespace Owin
             if (app == null)
             {
                 throw new ArgumentNullException("app");
+            }
+
+            if (!app.IsAutofacLifetimeScopeInjectorRegistered())
+            {
+                throw new InvalidOperationException(String.Format(CultureInfo.InvariantCulture, Resources.LifetimeScopeInjectorNotFoundWhileRegisteringMiddleware, typeof(T)));
             }
 
             return app.Use<AutofacMiddleware<T>>();
