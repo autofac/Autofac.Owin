@@ -1,29 +1,26 @@
 ﻿using System;
 using Microsoft.Owin;
 using Moq;
-using NUnit.Framework;
+using Xunit;
 
 namespace Autofac.Integration.Owin.Test
 {
-    [TestFixture]
     public class OwinContextExtensionsFixture
     {
-        [Test]
+        [Fact]
         public void GetAutofacLifetimeScopeReturnsInstanceFromContext()
         {
             var context = new Mock<IOwinContext>();
             context.Setup(mock => mock.Get<ILifetimeScope>(Constants.OwinLifetimeScopeKey));
-
             context.Object.GetAutofacLifetimeScope();
-
             context.VerifyAll();
         }
 
-        [Test]
+        [Fact]
         public void GetAutofacLifetimeScopeThrowsWhenProvidedNullInstance()
         {
             var exception = Assert.Throws<ArgumentNullException>(() => OwinContextExtensions.GetAutofacLifetimeScope(null));
-            Assert.That(exception.ParamName, Is.EqualTo("context"));
+            Assert.Equal("context", exception.ParamName);
         }
     }
 }

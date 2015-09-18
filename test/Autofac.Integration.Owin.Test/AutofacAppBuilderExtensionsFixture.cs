@@ -2,15 +2,14 @@
 using Autofac.Core.Lifetime;
 using Microsoft.Owin.Testing;
 using Moq;
-using NUnit.Framework;
 using Owin;
+using Xunit;
 
 namespace Autofac.Integration.Owin.Test
 {
-    [TestFixture]
     public class AutofacAppBuilderExtensionsFixture
     {
-        [Test]
+        [Fact]
         public void UseAutofacLifetimeScopeInjectorAddsChildLifetimeScopeToOwinContext()
         {
             var builder = new ContainerBuilder();
@@ -25,11 +24,11 @@ namespace Autofac.Integration.Owin.Test
                 }))
             {
                 server.HttpClient.GetAsync("/").Wait();
-                Assert.That(TestMiddleware.LifetimeScope.Tag, Is.EqualTo(MatchingScopeLifetimeTags.RequestLifetimeScopeTag));
+                Assert.Equal(MatchingScopeLifetimeTags.RequestLifetimeScopeTag, TestMiddleware.LifetimeScope.Tag);
             }
         }
 
-        [Test]
+        [Fact]
         public void UseAutofacLifetimeScopeInjectorDoesntAddWrappedMiddlewareInstancesToAppBuilder()
         {
             var builder = new ContainerBuilder();
@@ -44,7 +43,7 @@ namespace Autofac.Integration.Owin.Test
             app.Verify(mock => mock.Use(It.IsAny<AutofacMiddleware<TestMiddleware>>(), It.IsAny<object[]>()), Times.Never);
         }
 
-        [Test]
+        [Fact]
         public void UseAutofacMiddlewareAddsChildLifetimeScopeToOwinContext()
         {
             var builder = new ContainerBuilder();
@@ -58,11 +57,11 @@ namespace Autofac.Integration.Owin.Test
                 }))
             {
                 server.HttpClient.GetAsync("/").Wait();
-                Assert.That(TestMiddleware.LifetimeScope.Tag, Is.EqualTo(MatchingScopeLifetimeTags.RequestLifetimeScopeTag));
+                Assert.Equal(MatchingScopeLifetimeTags.RequestLifetimeScopeTag, TestMiddleware.LifetimeScope.Tag);
             }
         }
 
-        [Test]
+        [Fact]
         public void UseAutofacMiddlewareAddsWrappedMiddlewareInstancesToAppBuilder()
         {
             var builder = new ContainerBuilder();
@@ -78,7 +77,7 @@ namespace Autofac.Integration.Owin.Test
             app.VerifyAll();
         }
 
-        [Test]
+        [Fact]
         public void UseMiddlewareFromContainerAddsSingleWrappedMiddlewareInstanceToAppBuilder()
         {
             var app = new Mock<IAppBuilder>();
