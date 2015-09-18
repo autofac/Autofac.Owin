@@ -132,11 +132,6 @@ namespace Owin
                 throw new ArgumentNullException("container");
             }
 
-            if (app.Properties.ContainsKey(InjectorRegisteredKey))
-            {
-                return app;
-            }
-
             return app.RegisterAutofacLifetimeScopeInjector(container);
         }
 
@@ -187,11 +182,6 @@ namespace Owin
             if (container == null)
             {
                 throw new ArgumentNullException("container");
-            }
-
-            if (app.Properties.ContainsKey(InjectorRegisteredKey))
-            {
-                return app;
             }
 
             return app
@@ -254,16 +244,16 @@ namespace Owin
         private static IAppBuilder RegisterAutofacLifetimeScopeInjector(this IAppBuilder app, ILifetimeScope container)
         {
             app.Use(async (context, next) =>
-                {
-                    using (var lifetimeScope = container.BeginLifetimeScope(MatchingScopeLifetimeTags.RequestLifetimeScopeTag,
+            {
+                using (var lifetimeScope = container.BeginLifetimeScope(MatchingScopeLifetimeTags.RequestLifetimeScopeTag,
                     b => b.RegisterInstance(context).As<IOwinContext>()))
-                    {
-                        context.Set(Constants.OwinLifetimeScopeKey, lifetimeScope);
-                        await next();
-                    }
-                });
+                {
+                    context.Set(Constants.OwinLifetimeScopeKey, lifetimeScope);
+                    await next();
+                }
+            });
 
-            app.Properties.Add(InjectorRegisteredKey, true);
+            app.Properties[InjectorRegisteredKey] = true;
             return app;
         }
 
