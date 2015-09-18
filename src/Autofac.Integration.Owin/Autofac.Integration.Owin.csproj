@@ -69,6 +69,7 @@
   <ItemGroup>
     <Compile Include="AutofacMiddleware.cs" />
     <Compile Include="Constants.cs" />
+    <Compile Include="GlobalSuppressions.cs" />
     <Compile Include="OwinContextExtensions.cs" />
     <Compile Include="AutofacAppBuilderExtensions.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
