@@ -1,6 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading;
 using Autofac.Core.Lifetime;
+using Autofac.Core.Registration;
+using Microsoft.Owin.Builder;
 using Microsoft.Owin.Testing;
 using Moq;
 using Owin;
@@ -10,6 +13,45 @@ namespace Autofac.Integration.Owin.Test
 {
     public class AutofacAppBuilderExtensionsFixture
     {
+        [Fact]
+        public void DisposeScopeOnAppDisposing()
+        {
+            var app = new AppBuilder();
+            var tcs = new CancellationTokenSource();
+            var scope = new TestableLifetimeScope();
+            app.Properties.Add("host.OnAppDisposing", tcs.Token);
+
+            app.DisposeScopeOnAppDisposing(scope);
+
+            tcs.Cancel();
+
+            Assert.True(scope.ScopeIsDisposed);
+        }
+
+        [Fact]
+        public void DisposeScopeOnAppDisposingDoesNothingWhenNoTokenPresent()
+        {
+            var app = new AppBuilder();
+            var scope = new TestableLifetimeScope();
+
+            // XUnit doesn't have Assert.DoesNotThrow
+            app.DisposeScopeOnAppDisposing(scope);
+        }
+
+        [Fact]
+        public void DisposeScopeOnAppDisposingLifetimeScopeRequired()
+        {
+            var app = new AppBuilder();
+            Assert.Throws<ArgumentNullException>(() => app.DisposeScopeOnAppDisposing(null));
+        }
+
+        [Fact]
+        public void DisposeScopeOnAppDisposingAppBuildRequired()
+        {
+            var app = (IAppBuilder)null;
+            Assert.Throws<ArgumentNullException>(() => app.DisposeScopeOnAppDisposing(new TestableLifetimeScope()));
+        }
+
         [Fact]
         public async void UseAutofacLifetimeScopeInjectorAddsChildLifetimeScopeToOwinContext()
         {
@@ -124,6 +166,22 @@ namespace Autofac.Integration.Owin.Test
             app.SetReturnsDefault(app.Object);
 
             Assert.Throws<InvalidOperationException>(() => app.Object.UseMiddlewareFromContainer<TestMiddleware>());
+        }
+
+        class TestableLifetimeScope : LifetimeScope
+        {
+            public bool ScopeIsDisposed { get; set; }
+
+            public TestableLifetimeScope()
+                : base(new ComponentRegistry())
+            {
+            }
+
+            protected override void Dispose(bool disposing)
+            {
+                base.Dispose(disposing);
+                this.ScopeIsDisposed = true;
+            }
         }
     }
 }
