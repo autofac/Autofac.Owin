@@ -46,13 +46,16 @@ namespace Owin
         /// <param name="app">The application builder.</param>
         /// <param name="handler">The handler to invoke. The constructed middleware will be available as a parameter.</param>
         /// <exception cref="System.ArgumentNullException">
-        /// Thrown if <paramref name="app"/> is <see langword="null"/>.
+        /// Thrown if <paramref name="app"/> or <paramref name="handler"/> is <see langword="null"/>.
+        /// </exception>
+        /// <exception cref="InvalidOperationException">
+        /// Thrown if lifetime scope injector not registered in pipeline.
         /// </exception>
         /// <example>
         /// <code lang="C#">
         /// app
         ///   .UseAutofacLifetimeScopeInjector(container)
-        ///   .Run&lt;Uploader&gt;((uploader, owinContext) =&gt; uploader.InvokeAsync(owinContext));
+        ///   .RunFromContainer&lt;Uploader&gt;((uploader, owinContext) =&gt; uploader.InvokeAsync(owinContext));
         /// </code>
         /// </example>
         /// <seealso cref="AutofacAppBuilderExtensions.UseAutofacLifetimeScopeInjector(IAppBuilder, ILifetimeScope)"/>
@@ -61,6 +64,11 @@ namespace Owin
             if (app == null)
             {
                 throw new ArgumentNullException("app");
+            }
+
+            if (handler == null)
+            {
+                throw new ArgumentNullException("handler");
             }
 
             if (!app.IsAutofacLifetimeScopeInjectorRegistered())
@@ -72,7 +80,9 @@ namespace Owin
                 .Run(context =>
                 {
                     if (context == null)
+                    {
                         throw new ArgumentNullException("context");
+                    }
 
                     return handler(context.GetAutofacLifetimeScope().Resolve<T>(), context);
                 });
