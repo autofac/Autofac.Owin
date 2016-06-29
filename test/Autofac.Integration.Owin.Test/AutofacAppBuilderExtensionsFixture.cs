@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using Autofac.Core.Lifetime;
 using Autofac.Core.Registration;
+using Autofac.Features.ResolveAnything;
 using Microsoft.Owin.Builder;
 using Microsoft.Owin.Testing;
 using Moq;
@@ -50,6 +52,32 @@ namespace Autofac.Integration.Owin.Test
         {
             var app = (IAppBuilder)null;
             Assert.Throws<ArgumentNullException>(() => app.DisposeScopeOnAppDisposing(new TestableLifetimeScope()));
+        }
+
+        [Fact]
+        public void GenerateAllAutofacMiddleware_CreatesOnlyRegisteredMiddlewareWithACTNARS()
+        {
+            // Issue #9: ACTNARS causes the list of registered middleware to fail during generation.
+            var builder = new ContainerBuilder();
+            builder.RegisterSource(new AnyConcreteTypeNotAlreadyRegisteredSource());
+            builder.RegisterType<TestMiddleware>();
+            var container = builder.Build();
+
+            var middlewareTypes = AutofacAppBuilderExtensions.GenerateAllAutofacMiddleware(container);
+            Assert.Equal(1, middlewareTypes.Count());
+            Assert.Contains(typeof(AutofacMiddleware<TestMiddleware>), middlewareTypes);
+        }
+
+        [Fact]
+        public void GenerateAllAutofacMiddleware_CreatesRegisteredMiddleware()
+        {
+            var builder = new ContainerBuilder();
+            builder.RegisterType<TestMiddleware>();
+            var container = builder.Build();
+
+            var middlewareTypes = AutofacAppBuilderExtensions.GenerateAllAutofacMiddleware(container);
+            Assert.Equal(1, middlewareTypes.Count());
+            Assert.Contains(typeof(AutofacMiddleware<TestMiddleware>), middlewareTypes);
         }
 
         [Fact]

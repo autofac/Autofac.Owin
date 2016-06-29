@@ -24,6 +24,7 @@
 // OTHER DEALINGS IN THE SOFTWARE.
 
 using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Globalization;
 using System.Linq;
@@ -64,12 +65,12 @@ namespace Owin
         {
             if (app == null)
             {
-                throw new ArgumentNullException("app");
+                throw new ArgumentNullException(nameof(app));
             }
 
             if (lifetimeScope == null)
             {
-                throw new ArgumentNullException("lifetimeScope");
+                throw new ArgumentNullException(nameof(lifetimeScope));
             }
 
             var context = new OwinContext(app.Properties);
@@ -111,7 +112,7 @@ namespace Owin
         {
             if (app == null)
             {
-                throw new ArgumentNullException("app");
+                throw new ArgumentNullException(nameof(app));
             }
 
             return app.Properties.ContainsKey(InjectorRegisteredKey);
@@ -163,12 +164,12 @@ namespace Owin
         {
             if (app == null)
             {
-                throw new ArgumentNullException("app");
+                throw new ArgumentNullException(nameof(app));
             }
 
             if (container == null)
             {
-                throw new ArgumentNullException("container");
+                throw new ArgumentNullException(nameof(container));
             }
 
             return app.RegisterAutofacLifetimeScopeInjector(container);
@@ -215,12 +216,12 @@ namespace Owin
         {
             if (app == null)
             {
-                throw new ArgumentNullException("app");
+                throw new ArgumentNullException(nameof(app));
             }
 
             if (container == null)
             {
-                throw new ArgumentNullException("container");
+                throw new ArgumentNullException(nameof(container));
             }
 
             return app
@@ -274,15 +275,51 @@ namespace Owin
         {
             if (app == null)
             {
-                throw new ArgumentNullException("app");
+                throw new ArgumentNullException(nameof(app));
             }
 
             if (!app.IsAutofacLifetimeScopeInjectorRegistered())
             {
-                throw new InvalidOperationException(String.Format(CultureInfo.InvariantCulture, Resources.LifetimeScopeInjectorNotFoundWhileRegisteringMiddleware, typeof(T)));
+                throw new InvalidOperationException(string.Format(CultureInfo.InvariantCulture, Resources.LifetimeScopeInjectorNotFoundWhileRegisteringMiddleware, typeof(T)));
             }
 
             return app.Use<AutofacMiddleware<T>>();
+        }
+
+        /// <summary>
+        /// Locates all explicitly registered middleware instances and generates the list of
+        /// corresponding <see cref="AutofacMiddleware{T}"/> types that should be inserted
+        /// into the application pipeline.
+        /// </summary>
+        /// <param name="container">
+        /// The <see cref="IComponentContext"/> containing registrations to convert to middleware.
+        /// </param>
+        /// <returns>
+        /// An <see cref="IEnumerable{T}"/> of <see cref="AutofacMiddleware{T}"/> wrapped around
+        /// registered middleware types.
+        /// </returns>
+        internal static IEnumerable<Type> GenerateAllAutofacMiddleware(IComponentContext container)
+        {
+            return container.ComponentRegistry.Registrations.SelectMany(r => r.Services)
+                .OfType<TypedService>()
+                .Where(s => IsMiddlewareButNotAutofac(s.ServiceType))
+                .Select(service => typeof(AutofacMiddleware<>).MakeGenericType(service.ServiceType))
+                .ToArray();
+        }
+
+        /// <summary>
+        /// Determines whether a type is middleware we should wrap.
+        /// </summary>
+        /// <param name="typeToCheck">The type to check.</param>
+        /// <returns>
+        /// <see langword="true" /> if the type is middleware, not abstract, and not
+        /// already wrapped; otherwise <see langword="false" />.
+        /// </returns>
+        private static bool IsMiddlewareButNotAutofac(Type typeToCheck)
+        {
+            return typeToCheck.IsAssignableTo<OwinMiddleware>() &&
+                !typeToCheck.IsAbstract &&
+                !(typeToCheck.IsGenericType && typeToCheck.GetGenericTypeDefinition() == typeof(AutofacMiddleware<>));
         }
 
         private static IAppBuilder RegisterAutofacLifetimeScopeInjector(this IAppBuilder app, ILifetimeScope container)
@@ -303,13 +340,7 @@ namespace Owin
 
         private static IAppBuilder UseAllMiddlewareRegisteredInContainer(this IAppBuilder app, IComponentContext container)
         {
-            var services = container.ComponentRegistry.Registrations.SelectMany(r => r.Services)
-                .OfType<TypedService>()
-                .Where(s => s.ServiceType.IsAssignableTo<OwinMiddleware>() && !s.ServiceType.IsAbstract)
-                .Select(service => typeof(AutofacMiddleware<>).MakeGenericType(service.ServiceType))
-                .Where(serviceType => !container.IsRegistered(serviceType));
-
-            var typedServices = services.ToArray();
+            var typedServices = GenerateAllAutofacMiddleware(container);
             if (!typedServices.Any())
             {
                 return app;
