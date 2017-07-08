@@ -100,6 +100,23 @@ namespace Autofac.Integration.Owin.Test
         }
 
         [Fact]
+        public async void UseAutofacLifetimeScopeInjectorDoesntAddLifetimeScopeToOwinContextIfAlreadyPresent()
+        {
+            var container = new ContainerBuilder().Build();
+
+            using (var server = TestServer.Create(app =>
+            {
+                app.UseAutofacLifetimeScopeInjector(container);
+                //we don't expect anything to be called on this one, so we want it to fail
+                app.UseAutofacLifetimeScopeInjector(new Mock<ILifetimeScope>(MockBehavior.Strict).Object);
+                app.Run(context => context.Response.WriteAsync("Hello, world!"));
+            }))
+            {
+                await server.HttpClient.GetAsync("/");
+            }
+        }
+
+        [Fact]
         public void UseAutofacLifetimeScopeInjectorDoesntAddWrappedMiddlewareInstancesToAppBuilder()
         {
             var builder = new ContainerBuilder();
