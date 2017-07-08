@@ -176,6 +176,67 @@ namespace Owin
         }
 
         /// <summary>
+        /// Adds middleware to inject an externally-defined Autofac lifetime scope into the OWIN pipeline.
+        /// </summary>
+        /// <param name="app">The application builder.</param>
+        /// <param name="scopeProvider">The delegate to get the scope (either from passed OWIN context or anywhere else).</param>
+        /// <returns>The application builder.</returns>
+        /// <exception cref="System.ArgumentNullException">
+        /// Thrown if <paramref name="app"/> or <paramref name="scopeProvider"/> is <see langword="null"/>.
+        /// </exception>
+        /// <remarks>
+        /// <para>
+        /// This extension is used when separating the notions of injecting the
+        /// lifetime scope and adding middleware to the pipeline from the container.
+        /// </para>
+        /// <para>
+        /// Since middleware registration order matters, generally you want the
+        /// Autofac request lifetime scope registered early in the pipeline, but
+        /// you may not want the middleware registered with Autofac added to the
+        /// pipeline until later.
+        /// </para>
+        /// <para>
+        /// This method won't add any disposal of passed lifetime scope;
+        /// the caller is responsible for disposing it at the appropriate moment.
+        /// </para>
+        /// <para>
+        /// This method gets used in conjunction with <see cref="UseMiddlewareFromContainer{T}(IAppBuilder)"/>.
+        /// Do not use this with <see cref="UseAutofacMiddleware(IAppBuilder, ILifetimeScope)"/>
+        /// or you'll get unexpected results!
+        /// </para>
+        /// </remarks>
+        /// <example>
+        /// <code lang="C#">
+        /// app
+        ///   .UseAutofacLifetimeScopeInjector(c => GetSomeExternallyDefinedLifetimeScope(c))
+        ///   .UseBasicAuthentication()
+        ///   .Use((c, next) =&gt;
+        ///   {
+        ///     //authorization
+        ///     return next();
+        ///   })
+        ///   .UseMiddlewareFromContainer&lt;PathRewriter&gt;()
+        ///   .UseSendFileFallback()
+        ///   .UseStaticFiles();
+        /// </code>
+        /// </example>
+        /// <seealso cref="UseMiddlewareFromContainer{T}(IAppBuilder)"/>
+        public static IAppBuilder UseAutofacLifetimeScopeInjector(this IAppBuilder app, Func<IOwinContext, ILifetimeScope> scopeProvider)
+        {
+            if (app == null)
+            {
+                throw new ArgumentNullException(nameof(app));
+            }
+
+            if (scopeProvider == null)
+            {
+                throw new ArgumentNullException(nameof(scopeProvider));
+            }
+
+            return app.RegisterAutofacLifetimeScopeInjector(scopeProvider, false);
+        }
+
+        /// <summary>
         /// Adds middleware to both inject a request-scoped Autofac lifetime scope into the OWIN pipeline
         /// as well as add all middleware components registered with Autofac.
         /// </summary>
@@ -324,21 +385,36 @@ namespace Owin
 
         private static IAppBuilder RegisterAutofacLifetimeScopeInjector(this IAppBuilder app, ILifetimeScope container)
         {
-            app.Use(async (context, next) =>
-                {
-                    if (context.GetAutofacLifetimeScope() != null)
-                    {
-                        await next();
-                        return;
-                    }
+            return app
+                .RegisterAutofacLifetimeScopeInjector(context =>
+                    container.BeginLifetimeScope(MatchingScopeLifetimeTags.RequestLifetimeScopeTag, b => b.RegisterInstance(context).As<IOwinContext>()),
+                    true);
+        }
 
-                    using (var lifetimeScope = container.BeginLifetimeScope(MatchingScopeLifetimeTags.RequestLifetimeScopeTag,
-                    b => b.RegisterInstance(context).As<IOwinContext>()))
+        private static IAppBuilder RegisterAutofacLifetimeScopeInjector(this IAppBuilder app, Func<IOwinContext,ILifetimeScope> scopeProvider, bool dispose)
+        {
+            app.Use(async (context, next) =>
+            {
+                if (context.GetAutofacLifetimeScope() != null)
+                {
+                    await next();
+                    return;
+                }
+
+                var lifetimeScope = scopeProvider(context);
+                try
+                {
+                    context.Set(Constants.OwinLifetimeScopeKey, lifetimeScope);
+                    await next();
+                }
+                finally
+                {
+                    if (dispose)
                     {
-                        context.Set(Constants.OwinLifetimeScopeKey, lifetimeScope);
-                        await next();
+                        lifetimeScope?.Dispose();
                     }
-                });
+                }
+            });
 
             app.Properties[InjectorRegisteredKey] = true;
             return app;
