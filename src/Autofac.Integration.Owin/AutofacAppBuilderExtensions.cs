@@ -404,7 +404,7 @@ namespace Owin
                 var lifetimeScope = scopeProvider(context);
                 try
                 {
-                    context.Set(Constants.OwinLifetimeScopeKey, lifetimeScope);
+                    context.SetAutofacLifetimeScope(lifetimeScope);
                     await next();
                 }
                 finally

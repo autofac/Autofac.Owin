@@ -20,7 +20,7 @@ namespace Autofac.Integration.Owin
         {
             if (context == null)
             {
-                throw new ArgumentNullException("context");
+                throw new ArgumentNullException(nameof(context));
             }
 
             return context.Get<ILifetimeScope>(Constants.OwinLifetimeScopeKey);
@@ -39,12 +39,12 @@ namespace Autofac.Integration.Owin
         {
             if (context == null)
             {
-                throw new ArgumentNullException("context");
+                throw new ArgumentNullException(nameof(context));
             }
 
             if (scope == null)
             {
-                throw new ArgumentNullException("scope");
+                throw new ArgumentNullException(nameof(scope));
             }
 
             context.Set(Constants.OwinLifetimeScopeKey, scope);
