@@ -5,6 +5,7 @@ using System.Threading;
 using Autofac.Core.Lifetime;
 using Autofac.Core.Registration;
 using Autofac.Features.ResolveAnything;
+using Microsoft.Owin;
 using Microsoft.Owin.Builder;
 using Microsoft.Owin.Testing;
 using Moq;
@@ -100,23 +101,6 @@ namespace Autofac.Integration.Owin.Test
         }
 
         [Fact]
-        public async void UseAutofacLifetimeScopeInjectorDoesntAddLifetimeScopeToOwinContextIfAlreadyPresent()
-        {
-            var container = new ContainerBuilder().Build();
-
-            using (var server = TestServer.Create(app =>
-            {
-                app.UseAutofacLifetimeScopeInjector(container);
-                //we don't expect anything to be called on this one, so we want it to fail
-                app.UseAutofacLifetimeScopeInjector(new Mock<ILifetimeScope>(MockBehavior.Strict).Object);
-                app.Run(context => context.Response.WriteAsync("Hello, world!"));
-            }))
-            {
-                await server.HttpClient.GetAsync("/");
-            }
-        }
-
-        [Fact]
         public async void UseAutofacLifetimeScopeInjectorDoesntOverrideScopeSetBySetAutofacLifetimeScope()
         {
             var lifetimeScope = new TestableLifetimeScope();
@@ -151,6 +135,94 @@ namespace Autofac.Integration.Owin.Test
                 });
                 app.UseAutofacLifetimeScopeInjector(new Mock<ILifetimeScope>(MockBehavior.Strict).Object);
                 app.Use<TestMiddleware>();
+                app.Run(context => context.Response.WriteAsync("Hello, world!"));
+            }))
+            {
+                await server.HttpClient.GetAsync("/");
+            }
+            Assert.False(lifetimeScope.ScopeIsDisposed);
+        }
+
+        [Fact]
+        public async void UseAutofacLifetimeScopeInjectorDoesntAddLifetimeScopeToOwinContextIfAlreadyPresent()
+        {
+            var container = new ContainerBuilder().Build();
+
+            using (var server = TestServer.Create(app =>
+            {
+                app.UseAutofacLifetimeScopeInjector(container);
+                //we don't expect anything to be called on this one, so we want it to fail
+                app.UseAutofacLifetimeScopeInjector(new Mock<ILifetimeScope>(MockBehavior.Strict).Object);
+                app.Run(context => context.Response.WriteAsync("Hello, world!"));
+            }))
+            {
+                await server.HttpClient.GetAsync("/");
+            }
+        }
+
+        [Fact]
+        public async void UseAutofacLifetimeScopeInjectorDisposesIt()
+        {
+            var container = new ContainerBuilder().Build();
+
+            var disposable = new Mock<IDisposable>();
+
+            using (var server = TestServer.Create(app =>
+            {
+                app.UseAutofacLifetimeScopeInjector(container);
+                app.Use((ctx, next) =>
+                {
+                    ctx.GetAutofacLifetimeScope().Disposer.AddInstanceForDisposal(disposable.Object);
+                    return next();
+                });
+                app.Run(context => context.Response.WriteAsync("Hello, world!"));
+            }))
+            {
+                await server.HttpClient.GetAsync("/");
+            }
+            disposable.Verify(d => d.Dispose());
+        }
+
+        [Fact]
+        public async void UseAutofacLifetimeScopeInjectorWithExternalScopeAddsItToOwinContext()
+        {
+            var lifetimeScope = new TestableLifetimeScope();
+            using (var server = TestServer.Create(app =>
+            {
+                app.UseAutofacLifetimeScopeInjector(ctx => lifetimeScope);
+                app.Use<TestMiddleware>();
+                app.Run(context => context.Response.WriteAsync("Hello, world!"));
+            }))
+            {
+                await server.HttpClient.GetAsync("/");
+                Assert.Same(lifetimeScope, TestMiddleware.LifetimeScope);
+            }
+        }
+
+        [Fact]
+        public async void UseAutofacLifetimeScopeInjectorWithExternalScopePassesOwinContextToTheProvider()
+        {
+            using (var server = TestServer.Create(app =>
+            {
+                app.UseAutofacLifetimeScopeInjector(ctx =>
+                {
+                    Assert.IsAssignableFrom<IOwinContext>(ctx);
+                    return new Mock<ILifetimeScope>().Object;
+                });
+                app.Run(context => context.Response.WriteAsync("Hello, world!"));
+            }))
+            {
+                await server.HttpClient.GetAsync("/");
+            }
+        }
+
+        [Fact]
+        public async void UseAutofacLifetimeScopeInjectorWithExternalScopeDoesntDisposeIt()
+        {
+            var lifetimeScope = new TestableLifetimeScope();
+            using (var server = TestServer.Create(app =>
+            {
+                app.UseAutofacLifetimeScopeInjector(ctx => lifetimeScope);
                 app.Run(context => context.Response.WriteAsync("Hello, world!"));
             }))
             {
