@@ -337,20 +337,25 @@ namespace Autofac.Integration.Owin.Test
                 app.UseAutofacLifetimeScopeInjector(new ContainerBuilder().Build());
                 app.Run(context =>
                 {
-                    //we can't directly compare contexts because they are recreated at each step in UseHandlerMidleware
-                    Assert.Same(
-                        context.Environment,
-                        context
-                            .GetAutofacLifetimeScope()
-                            .Resolve<IOwinContext>()
-                            .Environment
-                            );
+                    AssertOwinContextRegisteredInLifetimeScope(context);
                     return Task.FromResult(0);
                 });
             }))
             {
                 await server.HttpClient.GetAsync("/");
             }
+        }
+
+        private static void AssertOwinContextRegisteredInLifetimeScope(IOwinContext context)
+        {
+            //we can't directly compare contexts because they are recreated at each step in UseHandlerMidleware
+            Assert.Same(
+                context.Environment,
+                context
+                    .GetAutofacLifetimeScope()
+                    .Resolve<IOwinContext>()
+                    .Environment
+            );
         }
 
         [Fact]
@@ -366,6 +371,65 @@ namespace Autofac.Integration.Owin.Test
                             .GetAutofacLifetimeScope()
                             .ResolveOptional<IOwinContext>()
                     );
+                    return Task.FromResult(0);
+                });
+            }))
+            {
+                await server.HttpClient.GetAsync("/");
+            }
+        }
+
+        [Fact]
+        public async void RegisterOwinContextShouldAddOwinContextToTheLifetimeScope()
+        {
+            using (var server = TestServer.Create(app =>
+            {
+                app.UseAutofacLifetimeScopeInjector(context => new ContainerBuilder().Build());
+                app.RegisterOwinContext();
+                app.Run(context =>
+                {
+                    AssertOwinContextRegisteredInLifetimeScope(context);
+                    return Task.FromResult(0);
+                });
+            }))
+            {
+                await server.HttpClient.GetAsync("/");
+            }
+        }
+
+        [Fact]
+        public async void RegisterOwinContextShouldAddOwinContextWithScopeVisibility()
+        {
+            var container = new ContainerBuilder().Build();
+            using (var server = TestServer.Create(app =>
+            {
+                app.UseAutofacLifetimeScopeInjector(context => container.BeginLifetimeScope());
+                app.RegisterOwinContext();
+                app.Run(context =>
+                {
+                    Assert.Null(container.ResolveOptional<IOwinContext>());
+                    Assert.Same(
+                        context.GetAutofacLifetimeScope().ResolveOptional<IOwinContext>(),
+                        context.GetAutofacLifetimeScope().ResolveOptional<IOwinContext>()
+                        );
+                    return Task.FromResult(0);
+                });
+            }))
+            {
+                await server.HttpClient.GetAsync("/");
+            }
+        }
+
+
+        [Fact]
+        public async void RegisterOwinContextWhenNoLifetimeScopeShouldDoNothing()
+        {
+            using (var server = TestServer.Create(app =>
+            {
+                app.RegisterOwinContext();
+                app.Run(context =>
+                {
+                    Assert.Null(context.GetAutofacLifetimeScope());
                     return Task.FromResult(0);
                 });
             }))

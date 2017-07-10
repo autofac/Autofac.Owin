@@ -200,6 +200,10 @@ namespace Owin
         /// the caller is responsible for disposing it at the appropriate moment.
         /// </para>
         /// <para>
+        /// This method does not add <see cref="IOwinContext"/> to the lifetime scope,
+        /// if you need this functionality, use it with <see cref="RegisterOwinContext"/>.
+        /// </para>
+        /// <para>
         /// This method gets used in conjunction with <see cref="UseMiddlewareFromContainer{T}(IAppBuilder)"/>.
         /// Do not use this with <see cref="UseAutofacMiddleware(IAppBuilder, ILifetimeScope)"/>
         /// or you'll get unexpected results!
@@ -432,6 +436,61 @@ namespace Owin
             {
                 app.Use(typedService);
             }
+
+            return app;
+        }
+
+        /// <summary>
+        /// Adds passing <see cref="IOwinContext"/> to existing <see cref="ILifetimeScope"/>.
+        /// </summary>
+        /// <param name="app">The application builder.</param>
+        /// <returns>The application builder.</returns>
+        /// <exception cref="System.ArgumentNullException">
+        /// Thrown if <paramref name="app"/> is <see langword="null"/>.
+        /// </exception>
+        /// <remarks>
+        /// This method is to be used in conjunction with <see cref="UseAutofacLifetimeScopeInjector(IAppBuilder, Func{IOwinContext,ILifetimeScope})"/>.
+        /// </remarks>
+        /// <seealso cref="UseAutofacLifetimeScopeInjector(IAppBuilder, Func{IOwinContext,ILifetimeScope})"/>
+        /// <example>
+        /// <code lang="C#">
+        /// app
+        ///   .UseAutofacLifetimeScopeInjector(c => GetSomeExternallyDefinedLifetimeScope(c))
+        ///   .RegisterOwinContext()
+        ///   .UseBasicAuthentication()
+        ///   .Use((c, next) =&gt;
+        ///   {
+        ///     //authorization
+        ///     return next();
+        ///   })
+        ///   .UseMiddlewareFromContainer&lt;PathRewriter&gt;()
+        ///   .UseSendFileFallback()
+        ///   .UseStaticFiles();
+        /// </code>
+        /// </example>
+        public static IAppBuilder RegisterOwinContext(this IAppBuilder app)
+        {
+            if (app == null)
+            {
+                throw new ArgumentNullException(nameof(app));
+            }
+
+            app.Use((context, next) =>
+            {
+                var requestScope = context.GetAutofacLifetimeScope();
+                if (requestScope != null)
+                {
+                    //the scope is updated in exactly the same way as in WebAPI:
+                    //https://github.com/autofac/Autofac.WebApi/blob/209684fe169ef6fc1daec6baca8c7b9ab469ead7/src/Autofac.Integration.WebApi/CurrentRequestHandler.cs#L63-L66
+                    //with the only difference that instead of registering per-request,
+                    //we register per scope (because we do not know how the created scope was marked)
+                    var registry = requestScope.ComponentRegistry;
+                    var builder = new ContainerBuilder();
+                    builder.RegisterInstance(context);
+                    builder.Update(registry);
+                }
+                return next();
+            });
 
             return app;
         }
