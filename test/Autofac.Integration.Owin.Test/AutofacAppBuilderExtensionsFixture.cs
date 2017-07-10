@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
+using System.Threading.Tasks;
 using Autofac.Core.Lifetime;
 using Autofac.Core.Registration;
 using Autofac.Features.ResolveAnything;
@@ -326,6 +327,51 @@ namespace Autofac.Integration.Owin.Test
             app.SetReturnsDefault(app.Object);
 
             Assert.Throws<InvalidOperationException>(() => app.Object.UseMiddlewareFromContainer<TestMiddleware>());
+        }
+
+        [Fact]
+        public async void UseAutofacLifetimeScopeInjectorWithContainerRegistersOwinContextInTheScope()
+        {
+            using (var server = TestServer.Create(app =>
+            {
+                app.UseAutofacLifetimeScopeInjector(new ContainerBuilder().Build());
+                app.Run(context =>
+                {
+                    //we can't directly compare contexts because they are recreated at each step in UseHandlerMidleware
+                    Assert.Same(
+                        context.Environment,
+                        context
+                            .GetAutofacLifetimeScope()
+                            .Resolve<IOwinContext>()
+                            .Environment
+                            );
+                    return Task.FromResult(0);
+                });
+            }))
+            {
+                await server.HttpClient.GetAsync("/");
+            }
+        }
+
+        [Fact]
+        public async void UseAutofacLifetimeScopeInjectorWithExternalScopeDoesNotRegisterOwinContextInTheScope()
+        {
+            using (var server = TestServer.Create(app =>
+            {
+                app.UseAutofacLifetimeScopeInjector(context => new ContainerBuilder().Build());
+                app.Run(context =>
+                {
+                    Assert.Null(
+                        context
+                            .GetAutofacLifetimeScope()
+                            .ResolveOptional<IOwinContext>()
+                    );
+                    return Task.FromResult(0);
+                });
+            }))
+            {
+                await server.HttpClient.GetAsync("/");
+            }
         }
 
         class TestableLifetimeScope : LifetimeScope
