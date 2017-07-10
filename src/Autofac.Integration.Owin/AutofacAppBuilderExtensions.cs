@@ -326,6 +326,12 @@ namespace Owin
         {
             app.Use(async (context, next) =>
                 {
+                    if (context.GetAutofacLifetimeScope() != null)
+                    {
+                        await next();
+                        return;
+                    }
+
                     using (var lifetimeScope = container.BeginLifetimeScope(MatchingScopeLifetimeTags.RequestLifetimeScopeTag,
                     b => b.RegisterInstance(context).As<IOwinContext>()))
                     {
