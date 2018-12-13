@@ -4,13 +4,13 @@
     <id>Autofac.Owin</id>
     <version>$version$</version>
     <authors>Autofac Contributors</authors>
-    <licenseUrl>http://www.opensource.org/licenses/mit-license.php</licenseUrl>
+    <licenseUrl>https://opensource.org/licenses/mit-license.php</licenseUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>OWIN 3.0+ Integration for Autofac</description>
     <summary>Provides dependency injection support for OWIN 3.0+ middleware.</summary>
     <language>en-US</language>
     <title>Autofac OWIN Integration</title>
-    <projectUrl>http://autofac.org</projectUrl>
+    <projectUrl>https://autofac.org</projectUrl>
     <iconUrl>https://cloud.githubusercontent.com/assets/1156571/13684110/16b8f152-e6bf-11e5-84ae-22c66c6d351a.png</iconUrl>
     <releaseNotes>Release notes are at https://github.com/autofac/Autofac.Owin/releases</releaseNotes>
     <dependencies>
