@@ -3,9 +3,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Autofac.Core;
 using Autofac.Core.Lifetime;
 using Autofac.Core.Registration;
+using Autofac.Core.Resolving;
 using Autofac.Features.ResolveAnything;
+using Autofac.Util;
 using Microsoft.Owin;
 using Microsoft.Owin.Builder;
 using Microsoft.Owin.Testing;
@@ -374,19 +377,56 @@ namespace Autofac.Integration.Owin.Test
             }
         }
 
-        class TestableLifetimeScope : LifetimeScope
+        public class TestableLifetimeScope : Disposable, ILifetimeScope
         {
             public bool ScopeIsDisposed { get; set; }
 
+            public IDisposer Disposer => throw new NotImplementedException();
+
+            public object Tag => throw new NotImplementedException();
+
+            public IComponentRegistry ComponentRegistry => throw new NotImplementedException();
+
             public TestableLifetimeScope()
-                : base(new ComponentRegistry())
             {
             }
 
+            public event EventHandler<LifetimeScopeBeginningEventArgs> ChildLifetimeScopeBeginning;
+            public event EventHandler<LifetimeScopeEndingEventArgs> CurrentScopeEnding;
+            public event EventHandler<ResolveOperationBeginningEventArgs> ResolveOperationBeginning;
+
             protected override void Dispose(bool disposing)
             {
+                CurrentScopeEnding?.Invoke(this, null);
                 base.Dispose(disposing);
                 this.ScopeIsDisposed = true;
+            }
+
+            public ILifetimeScope BeginLifetimeScope()
+            {
+                ChildLifetimeScopeBeginning(this, null);
+                throw new NotImplementedException();
+            }
+
+            public ILifetimeScope BeginLifetimeScope(object tag)
+            {
+                throw new NotImplementedException();
+            }
+
+            public ILifetimeScope BeginLifetimeScope(Action<ContainerBuilder> configurationAction)
+            {
+                throw new NotImplementedException();
+            }
+
+            public ILifetimeScope BeginLifetimeScope(object tag, Action<ContainerBuilder> configurationAction)
+            {
+                throw new NotImplementedException();
+            }
+
+            public object ResolveComponent(ResolveRequest request)
+            {
+                ResolveOperationBeginning(this, null);
+                throw new NotImplementedException();
             }
         }
     }
