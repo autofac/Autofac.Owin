@@ -7,6 +7,29 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Autofac.Integration.Owin", 
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Autofac.Integration.Owin.Test", "test\Autofac.Integration.Owin.Test\Autofac.Integration.Owin.Test.csproj", "{D8A14ED9-A755-4B5E-B5D5-07235EB564BE}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{3C991431-A288-42BA-9C69-86B091B2C56B}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{35578456-2C8C-4B20-BBF2-F95B03A4914F}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "misc", "misc", "{F7EDFB70-6EEE-4835-9FE9-B37B21E1FAB9}"
+ProjectSection(SolutionItems) = preProject
+	.editorconfig = .editorconfig
+	.gitignore = .gitignore
+	appveyor.yml = appveyor.yml
+	NuGet.Config = NuGet.Config
+	README.md = README.md
+	global.json = global.json
+	build.ps1 = build.ps1
+EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "build", "build", "{949FD8FC-B5EC-46F8-A2BE-0FEAAD37C462}"
+ProjectSection(SolutionItems) = preProject
+	build\Analyzers.ruleset = build\Analyzers.ruleset
+	build\Autofac.Build.psd1 = build\Autofac.Build.psd1
+	build\Autofac.Build.psm1 = build\Autofac.Build.psm1
+	build\icon.png = build\icon.png
+EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -24,5 +47,9 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{D8A14ED9-A755-4B5E-B5D5-07235EB564BE} = {35578456-2C8C-4B20-BBF2-F95B03A4914F}
+		{726D9F07-4E72-4B6C-8A38-F2AE56F91616} = {3C991431-A288-42BA-9C69-86B091B2C56B}
 	EndGlobalSection
 EndGlobal
