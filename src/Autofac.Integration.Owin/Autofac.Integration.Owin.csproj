@@ -5,7 +5,7 @@
     <Product>Autofac</Product>
     <PackageId>Autofac.Owin</PackageId>
     <PackageIcon>icon.png</PackageIcon>
-    <PackageReleaseNotes>Release notes are at https://github.com/autofac/Autofac.Integration.Owin/releases</PackageReleaseNotes>
+    <PackageReleaseNotes>Release notes are at https://github.com/autofac/Autofac.Owin/releases</PackageReleaseNotes>
     <PackageProjectUrl>https://autofac.org</PackageProjectUrl>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <VersionPrefix>0.0.1</VersionPrefix>
