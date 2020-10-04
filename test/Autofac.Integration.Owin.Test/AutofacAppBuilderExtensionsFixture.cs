@@ -68,8 +68,8 @@ namespace Autofac.Integration.Owin.Test
             builder.RegisterType<TestMiddleware>();
             var container = builder.Build();
 
-            var middlewareTypes = AutofacAppBuilderExtensions.GenerateAllAutofacMiddleware(container);
-            Assert.Equal(1, middlewareTypes.Count());
+            var middlewareTypes = AutofacAppBuilderExtensions.GenerateAllAutofacMiddleware(container).ToArray();
+            Assert.Single(middlewareTypes);
             Assert.Contains(typeof(AutofacMiddleware<TestMiddleware>), middlewareTypes);
         }
 
@@ -80,8 +80,8 @@ namespace Autofac.Integration.Owin.Test
             builder.RegisterType<TestMiddleware>();
             var container = builder.Build();
 
-            var middlewareTypes = AutofacAppBuilderExtensions.GenerateAllAutofacMiddleware(container);
-            Assert.Equal(1, middlewareTypes.Count());
+            var middlewareTypes = AutofacAppBuilderExtensions.GenerateAllAutofacMiddleware(container).ToArray();
+            Assert.Single(middlewareTypes);
             Assert.Contains(typeof(AutofacMiddleware<TestMiddleware>), middlewareTypes);
         }
 

@@ -19,7 +19,6 @@ project.lock.json
 [Rr]eleases/
 x64/
 x86/
-build/
 bld/
 [Bb]in/
 [Oo]bj/
@@ -199,3 +198,6 @@ FakesAssemblies/
 
 # Mac OS
 *DS_Store
+
+# JetBrains Rider
+.idea/
