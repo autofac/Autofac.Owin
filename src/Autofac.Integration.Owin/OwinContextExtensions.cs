@@ -64,7 +64,7 @@ namespace Autofac.Integration.Owin
             {
                 throw new ArgumentNullException(nameof(context));
             }
-            
+
             context.Environment.Remove(Constants.OwinLifetimeScopeKey);
         }
     }

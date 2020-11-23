@@ -71,17 +71,17 @@ namespace Autofac.Integration.Owin.Test
         [Fact]
         public void RemoveAutofacLifetimeScopeRemovesScopeFromContext()
         {
-            //var scope = new Mock<ILifetimeScope>().Object;
-            //var context = new Mock<IOwinContext>();
-            //var environment = new Mock<IDictionary<string, object>>();
+            var scope = new Mock<ILifetimeScope>().Object;
+            var context = new Mock<IOwinContext>();
+            var environment = new Mock<IDictionary<string, object>>();
 
-            //context.Setup(mock => mock.Set(Constants.OwinLifetimeScopeKey, scope));
-            //context.Setup(mock => mock.Environment).Returns(environment.Object);
-            //environment.Setup(mock => mock.Remove(Constants.OwinLifetimeScopeKey));
-            //context.Object.SetAutofacLifetimeScope(scope);
-            //context.Object.RemoveAutofacLifetimeScope();
+            context.Setup(mock => mock.Set(Constants.OwinLifetimeScopeKey, scope));
+            context.Setup(mock => mock.Environment).Returns(environment.Object);
+            environment.Setup(mock => mock.Remove(Constants.OwinLifetimeScopeKey));
+            context.Object.SetAutofacLifetimeScope(scope);
+            context.Object.RemoveAutofacLifetimeScope();
 
-            //context.VerifyAll();
+            context.VerifyAll();
         }
 
         [Fact]
