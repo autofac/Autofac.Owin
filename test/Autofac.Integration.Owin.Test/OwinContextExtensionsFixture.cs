@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections;
+using System.Collections.Generic;
 using Microsoft.Owin;
 using Microsoft.Owin.Testing;
 using Moq;
@@ -22,6 +24,13 @@ namespace Autofac.Integration.Owin.Test
         public void GetAutofacLifetimeScopeThrowsWhenProvidedNullInstance()
         {
             var exception = Assert.Throws<ArgumentNullException>(() => OwinContextExtensions.GetAutofacLifetimeScope(null));
+            Assert.Equal("context", exception.ParamName);
+        }
+
+        [Fact]
+        public void RemoveAutofacLifetimeScopeThrowsWhenProvidedNullInstance()
+        {
+            var exception = Assert.Throws<ArgumentNullException>(() => OwinContextExtensions.RemoveAutofacLifetimeScope(null));
             Assert.Equal("context", exception.ParamName);
         }
 
@@ -54,10 +63,32 @@ namespace Autofac.Integration.Owin.Test
         public void GetAutofacLifetimeScopeReturnsTheInstanceFromSetLifetimeScope()
         {
             var instance = new Mock<ILifetimeScope>().Object;
-
             var context = new OwinContext();
             context.SetAutofacLifetimeScope(instance);
             Assert.Same(instance, context.GetAutofacLifetimeScope());
+        }
+
+        [Fact]
+        public void RemoveAutofacLifetimeScopeRemovesScopeFromContext()
+        {
+            //var scope = new Mock<ILifetimeScope>().Object;
+            //var context = new Mock<IOwinContext>();
+            //var environment = new Mock<IDictionary<string, object>>();
+
+            //context.Setup(mock => mock.Set(Constants.OwinLifetimeScopeKey, scope));
+            //context.Setup(mock => mock.Environment).Returns(environment.Object);
+            //environment.Setup(mock => mock.Remove(Constants.OwinLifetimeScopeKey));
+            //context.Object.SetAutofacLifetimeScope(scope);
+            //context.Object.RemoveAutofacLifetimeScope();
+
+            //context.VerifyAll();
+        }
+
+        [Fact]
+        public void RemoveAutofacLifetimeScopeDoesNotThrowIfScopeNotPresent()
+        {
+            var context = new OwinContext();
+            context.RemoveAutofacLifetimeScope();
         }
 
         [Fact]

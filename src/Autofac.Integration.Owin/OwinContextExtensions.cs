@@ -50,5 +50,22 @@ namespace Autofac.Integration.Owin
             context.Set(Constants.OwinLifetimeScopeKey, scope);
         }
 
+        /// <summary>
+        /// Removes the Autofac lifetime scope from the OWIN context if it is present.
+        /// </summary>
+        /// <param name="context">The OWIN context.</param>
+        /// <exception cref="System.ArgumentNullException">
+        /// Thrown if <paramref name="context" /> is <see langword="null" />.
+        /// </exception>
+        /// <remarks>The caller is responsible for the appropriate disposal of the passed <see cref="ILifetimeScope"/>.</remarks>
+        public static void RemoveAutofacLifetimeScope(this IOwinContext context)
+        {
+            if (context == null)
+            {
+                throw new ArgumentNullException(nameof(context));
+            }
+            
+            context.Environment.Remove(Constants.OwinLifetimeScopeKey);
+        }
     }
 }
