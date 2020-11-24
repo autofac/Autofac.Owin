@@ -57,7 +57,6 @@ namespace Autofac.Integration.Owin
         /// <exception cref="System.ArgumentNullException">
         /// Thrown if <paramref name="context" /> is <see langword="null" />.
         /// </exception>
-        /// <remarks>The caller is responsible for the appropriate disposal of the passed <see cref="ILifetimeScope"/>.</remarks>
         public static void RemoveAutofacLifetimeScope(this IOwinContext context)
         {
             if (context == null)
