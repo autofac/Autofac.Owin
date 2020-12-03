@@ -202,7 +202,7 @@ namespace Autofac.Integration.Owin.Test
                     {
                         return next();
                     }
-                    catch(Exception ex)
+                    catch
                     {
                         Assert.False(ctx.Environment.ContainsKey(Constants.OwinLifetimeScopeKey));
                         throw;
