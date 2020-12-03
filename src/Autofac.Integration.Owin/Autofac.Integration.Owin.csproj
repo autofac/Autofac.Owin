@@ -1,24 +1,32 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
+    <Description>Autofac OWIN Integration</Description>
+    <!-- VersionPrefix patched by AppVeyor -->
+    <VersionPrefix>0.0.1</VersionPrefix>
     <TargetFramework>net472</TargetFramework>
-    <Company>Autofac Project - https://autofac.org</Company>
-    <Product>Autofac</Product>
+    <LangVersion>latest</LangVersion>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <AssemblyName>Autofac.Integration.Owin</AssemblyName>
+    <AssemblyOriginatorKeyFile>../../Autofac.snk</AssemblyOriginatorKeyFile>
+    <SignAssembly>true</SignAssembly>
     <PackageId>Autofac.Owin</PackageId>
-    <PackageIcon>icon.png</PackageIcon>
     <PackageReleaseNotes>Release notes are at https://github.com/autofac/Autofac.Owin/releases</PackageReleaseNotes>
+    <PackageIcon>icon.png</PackageIcon>
     <PackageProjectUrl>https://autofac.org</PackageProjectUrl>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
-    <VersionPrefix>0.0.1</VersionPrefix>
+    <RepositoryType>git</RepositoryType>
+    <RepositoryUrl>https://github.com/autofac/Autofac.Owin</RepositoryUrl>
+    <AssemblyTitle>Autofac.Integration.Owin</AssemblyTitle>
     <NeutralLanguage>en</NeutralLanguage>
-    <Description>Autofac OWIN Integration</Description>
     <Copyright>Copyright © 2014 Autofac Contributors</Copyright>
     <GenerateAssemblyConfigurationAttribute>false</GenerateAssemblyConfigurationAttribute>
-    <DocumentationFile>bin\$(Configuration)\Autofac.Integration.Owin.xml</DocumentationFile>
     <RunCodeAnalysis>true</RunCodeAnalysis>
-    <SignAssembly>true</SignAssembly>
     <CodeAnalysisRuleSet>../../build/Analyzers.ruleset</CodeAnalysisRuleSet>
-    <AssemblyOriginatorKeyFile>..\..\Autofac.snk</AssemblyOriginatorKeyFile>
+    <PublishRepositoryUrl>true</PublishRepositoryUrl>
     <EmbedAllSources>true</EmbedAllSources>
+    <Authors>Autofac Contributors</Authors>
+    <Company>Autofac</Company>
+    <Product>Autofac</Product>
   </PropertyGroup>
 
   <ItemGroup>
