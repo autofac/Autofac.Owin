@@ -1,27 +1,5 @@
-﻿// This software is part of the Autofac IoC container
-// Copyright © 2014 Autofac Contributors
-// https://autofac.org
-//
-// Permission is hereby granted, free of charge, to any person
-// obtaining a copy of this software and associated documentation
-// files (the "Software"), to deal in the Software without
-// restriction, including without limitation the rights to use,
-// copy, modify, merge, publish, distribute, sublicense, and/or sell
-// copies of the Software, and to permit persons to whom the
-// Software is furnished to do so, subject to the following
-// conditions:
-//
-// The above copyright notice and this permission notice shall be
-// included in all copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
-// EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
-// OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
-// NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
-// HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
-// WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
-// FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
-// OTHER DEALINGS IN THE SOFTWARE.
+﻿// Copyright (c) Autofac Project. All rights reserved.
+// Licensed under the MIT License. See LICENSE in the project root for license information.
 
 using System;
 using System.Collections.Generic;
@@ -57,7 +35,7 @@ namespace Owin
         /// </summary>
         /// <param name="app">The application builder.</param>
         /// <param name="lifetimeScope">The Autofac lifetime scope that should be disposed.</param>
-        /// <returns>The application builder.</returns>
+        /// <returns>The application builder for continued configuration.</returns>
         /// <exception cref="System.ArgumentNullException">
         /// Thrown if <paramref name="app" /> or <paramref name="lifetimeScope" /> is <see langword="null" />.
         /// </exception>
@@ -123,7 +101,7 @@ namespace Owin
         /// </summary>
         /// <param name="app">The application builder.</param>
         /// <param name="container">The root Autofac application lifetime scope/container.</param>
-        /// <returns>The application builder.</returns>
+        /// <returns>The application builder for continued configuration.</returns>
         /// <exception cref="System.ArgumentNullException">
         /// Thrown if <paramref name="app"/> or <paramref name="container"/> is <see langword="null"/>.
         /// </exception>
@@ -141,7 +119,7 @@ namespace Owin
         /// <para>
         /// This method gets used in conjunction with <see cref="UseMiddlewareFromContainer{T}(IAppBuilder)"/>.
         /// Do not use this with <see cref="UseAutofacMiddleware(IAppBuilder, ILifetimeScope)"/>
-        /// or you'll get unexpected results!
+        /// or you'll get unexpected results.
         /// </para>
         /// </remarks>
         /// <example>
@@ -180,7 +158,7 @@ namespace Owin
         /// </summary>
         /// <param name="app">The application builder.</param>
         /// <param name="scopeProvider">The delegate to get the scope (either from passed OWIN context or anywhere else).</param>
-        /// <returns>The application builder.</returns>
+        /// <returns>The application builder for continued configuration.</returns>
         /// <exception cref="System.ArgumentNullException">
         /// Thrown if <paramref name="app"/> or <paramref name="scopeProvider"/> is <see langword="null"/>.
         /// </exception>
@@ -202,7 +180,7 @@ namespace Owin
         /// <para>
         /// This method gets used in conjunction with <see cref="UseMiddlewareFromContainer{T}(IAppBuilder)"/>.
         /// Do not use this with <see cref="UseAutofacMiddleware(IAppBuilder, ILifetimeScope)"/>
-        /// or you'll get unexpected results!
+        /// or you'll get unexpected results.
         /// </para>
         /// </remarks>
         /// <example>
@@ -242,7 +220,7 @@ namespace Owin
         /// </summary>
         /// <param name="app">The application builder.</param>
         /// <param name="container">The root Autofac application lifetime scope/container.</param>
-        /// <returns>The application builder.</returns>
+        /// <returns>The application builder for continued configuration.</returns>
         /// <exception cref="System.ArgumentNullException">
         /// Thrown if <paramref name="app"/> or <paramref name="container"/> is <see langword="null"/>.
         /// </exception>
@@ -256,7 +234,7 @@ namespace Owin
         /// <para>
         /// Do not use this with <see cref="UseAutofacLifetimeScopeInjector(IAppBuilder, ILifetimeScope)"/>
         /// or <see cref="UseMiddlewareFromContainer{T}(IAppBuilder)"/>
-        /// or you'll get unexpected results!
+        /// or you'll get unexpected results.
         /// </para>
         /// </remarks>
         /// <example>
@@ -291,10 +269,11 @@ namespace Owin
         }
 
         /// <summary>
-        /// Adds a middleware to the OWIN pipeline that will be constructed using Autofac
+        /// Adds a middleware to the OWIN pipeline that will be constructed using Autofac.
         /// </summary>
+        /// <typeparam name="T">The type of middleware to inject.</typeparam>
         /// <param name="app">The application builder.</param>
-        /// <returns>The application builder.</returns>
+        /// <returns>The application builder for continued configuration.</returns>
         /// <exception cref="System.ArgumentNullException">
         /// Thrown if <paramref name="app"/> is <see langword="null"/>.
         /// </exception>
@@ -312,7 +291,7 @@ namespace Owin
         /// <para>
         /// This method gets used in conjunction with <see cref="UseAutofacLifetimeScopeInjector(IAppBuilder, ILifetimeScope)"/>.
         /// Do not use this with <see cref="UseAutofacMiddleware(IAppBuilder, ILifetimeScope)"/>
-        /// or you'll get unexpected results!
+        /// or you'll get unexpected results.
         /// </para>
         /// </remarks>
         /// <example>
@@ -386,12 +365,12 @@ namespace Owin
         private static IAppBuilder RegisterAutofacLifetimeScopeInjector(this IAppBuilder app, ILifetimeScope container)
         {
             return app
-                .RegisterAutofacLifetimeScopeInjector(context =>
-                    container.BeginLifetimeScope(MatchingScopeLifetimeTags.RequestLifetimeScopeTag, b => b.RegisterInstance(context).As<IOwinContext>()),
-                    true);
+                .RegisterAutofacLifetimeScopeInjector(
+                    context =>
+                        container.BeginLifetimeScope(MatchingScopeLifetimeTags.RequestLifetimeScopeTag, b => b.RegisterInstance(context).As<IOwinContext>()), true);
         }
 
-        private static IAppBuilder RegisterAutofacLifetimeScopeInjector(this IAppBuilder app, Func<IOwinContext,ILifetimeScope> scopeProvider, bool dispose)
+        private static IAppBuilder RegisterAutofacLifetimeScopeInjector(this IAppBuilder app, Func<IOwinContext, ILifetimeScope> scopeProvider, bool dispose)
         {
             app.Use(async (context, next) =>
             {
