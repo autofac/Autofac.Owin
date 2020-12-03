@@ -413,6 +413,8 @@ namespace Owin
                     {
                         lifetimeScope?.Dispose();
                     }
+
+                    context.RemoveAutofacLifetimeScope();
                 }
             });
 

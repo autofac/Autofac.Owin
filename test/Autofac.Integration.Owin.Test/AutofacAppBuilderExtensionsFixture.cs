@@ -188,6 +188,75 @@ namespace Autofac.Integration.Owin.Test
         }
 
         [Fact]
+        public async void RemoveAutofacLifetimeScopeAfterUse()
+        {
+            var builder = new ContainerBuilder();
+            builder.RegisterType<TestMiddleware>();
+            var container = builder.Build();
+
+            using (var server = TestServer.Create(app =>
+            {
+                app.Use((ctx, next) =>
+                {
+                    try
+                    {
+                        return next();
+                    }
+                    catch(Exception ex)
+                    {
+                        Assert.False(ctx.Environment.ContainsKey(Constants.OwinLifetimeScopeKey));
+                        throw;
+                    }
+                });
+                app.UseAutofacLifetimeScopeInjector(container);
+                app.Use<TestMiddleware>();
+                app.Use((ctx, next) =>
+                {
+                    Assert.True(ctx.Environment.ContainsKey(Constants.OwinLifetimeScopeKey));
+                    return next();
+                });
+            }))
+            {
+                await server.HttpClient.GetAsync("/");
+            }
+        }
+
+        [Fact]
+        public async void RemoveAutofacLifetimeScopeAfterUseWhenExceptionThrown()
+        {
+            var builder = new ContainerBuilder();
+            builder.RegisterType<TestMiddleware>();
+            var container = builder.Build();
+
+            using (var server = TestServer.Create(app =>
+            {
+                app.Use((ctx, next) =>
+                {
+                    var nextInvoke = next();
+                    Assert.False(ctx.Environment.ContainsKey(Constants.OwinLifetimeScopeKey));
+                    return nextInvoke;
+                });
+                app.UseAutofacLifetimeScopeInjector(container);
+                app.Use<TestMiddleware>();
+                app.Use((ctx, next) =>
+                {
+                    Assert.True(ctx.Environment.ContainsKey(Constants.OwinLifetimeScopeKey));
+                    throw new Exception("Test Exception");
+                });
+            }))
+            {
+                try
+                {
+                   await server.HttpClient.GetAsync("/");
+                }
+                catch(Exception ex)
+                {
+                    Assert.Equal("Test Exception", ex.Message);
+                }
+            }
+        }
+
+        [Fact]
         public async void UseAutofacLifetimeScopeInjectorWithExternalScopeAddsItToOwinContext()
         {
             var lifetimeScope = new TestableLifetimeScope();
