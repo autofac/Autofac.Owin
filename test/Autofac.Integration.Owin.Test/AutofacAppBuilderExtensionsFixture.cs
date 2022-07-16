@@ -170,13 +170,18 @@ namespace Autofac.Integration.Owin.Test
             var container = new ContainerBuilder().Build();
 
             var disposable = new Mock<IDisposable>();
+            var asyncDisposable = new Mock<IAsyncDisposable>();
 
             using (var server = TestServer.Create(app =>
             {
                 app.UseAutofacLifetimeScopeInjector(container);
                 app.Use((ctx, next) =>
                 {
-                    ctx.GetAutofacLifetimeScope().Disposer.AddInstanceForDisposal(disposable.Object);
+                    var disposer = ctx.GetAutofacLifetimeScope().Disposer;
+
+                    disposer.AddInstanceForDisposal(disposable.Object);
+                    disposer.AddInstanceForAsyncDisposal(asyncDisposable.Object);
+
                     return next();
                 });
                 app.Run(context => context.Response.WriteAsync("Hello, world!"));
@@ -184,7 +189,9 @@ namespace Autofac.Integration.Owin.Test
             {
                 await server.HttpClient.GetAsync("/");
             }
+
             disposable.Verify(d => d.Dispose());
+            asyncDisposable.Verify(d => d.DisposeAsync());
         }
 
         [Fact]
