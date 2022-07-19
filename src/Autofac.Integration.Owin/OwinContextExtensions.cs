@@ -13,7 +13,7 @@ public static class OwinContextExtensions
     /// </summary>
     /// <param name="context">The OWIN context.</param>
     /// <returns>The current lifetime scope.</returns>
-    /// <exception cref="System.ArgumentNullException">
+    /// <exception cref="ArgumentNullException">
     /// Thrown if <paramref name="context" /> is <see langword="null" />.
     /// </exception>
     public static ILifetimeScope GetAutofacLifetimeScope(this IOwinContext context)
@@ -31,7 +31,7 @@ public static class OwinContextExtensions
     /// </summary>
     /// <param name="context">The OWIN context.</param>
     /// <param name="scope">The current lifetime scope.</param>
-    /// <exception cref="System.ArgumentNullException">
+    /// <exception cref="ArgumentNullException">
     /// Thrown if <paramref name="context" /> or <paramref name="scope" /> is <see langword="null" />.
     /// </exception>
     /// <remarks>The caller is responsible for the appropriate disposal of the passed <see cref="ILifetimeScope"/>.</remarks>
@@ -54,7 +54,7 @@ public static class OwinContextExtensions
     /// Removes the Autofac lifetime scope from the OWIN context if it is present.
     /// </summary>
     /// <param name="context">The OWIN context.</param>
-    /// <exception cref="System.ArgumentNullException">
+    /// <exception cref="ArgumentNullException">
     /// Thrown if <paramref name="context" /> is <see langword="null" />.
     /// </exception>
     public static void RemoveAutofacLifetimeScope(this IOwinContext context)

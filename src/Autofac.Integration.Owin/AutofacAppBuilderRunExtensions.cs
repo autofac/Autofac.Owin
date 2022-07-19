@@ -21,7 +21,7 @@ public static class AutofacAppBuilderRunExtensions
     /// <typeparam name="T">The type of middleware to inject.</typeparam>
     /// <param name="app">The application builder.</param>
     /// <param name="handler">The handler to invoke. The constructed middleware will be available as a parameter.</param>
-    /// <exception cref="System.ArgumentNullException">
+    /// <exception cref="ArgumentNullException">
     /// Thrown if <paramref name="app"/> or <paramref name="handler"/> is <see langword="null"/>.
     /// </exception>
     /// <exception cref="InvalidOperationException">
@@ -50,7 +50,7 @@ public static class AutofacAppBuilderRunExtensions
 
         if (!app.IsAutofacLifetimeScopeInjectorRegistered())
         {
-            throw new InvalidOperationException(String.Format(CultureInfo.InvariantCulture, Resources.LifetimeScopeInjectorNotFoundWhileRegisteringMiddleware, typeof(T)));
+            throw new InvalidOperationException(string.Format(CultureInfo.InvariantCulture, Resources.LifetimeScopeInjectorNotFoundWhileRegisteringMiddleware, typeof(T)));
         }
 
         app

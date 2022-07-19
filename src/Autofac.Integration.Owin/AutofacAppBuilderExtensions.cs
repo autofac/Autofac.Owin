@@ -31,7 +31,7 @@ public static class AutofacAppBuilderExtensions
     /// <param name="app">The application builder.</param>
     /// <param name="lifetimeScope">The Autofac lifetime scope that should be disposed.</param>
     /// <returns>The application builder for continued configuration.</returns>
-    /// <exception cref="System.ArgumentNullException">
+    /// <exception cref="ArgumentNullException">
     /// Thrown if <paramref name="app" /> or <paramref name="lifetimeScope" /> is <see langword="null" />.
     /// </exception>
     public static IAppBuilder DisposeScopeOnAppDisposing(this IAppBuilder app, ILifetimeScope lifetimeScope)
@@ -66,7 +66,7 @@ public static class AutofacAppBuilderExtensions
     /// <see langword="true"/> if the Autofac lifetime scope injector has been registered
     /// with the <paramref name="app"/>; <see langword="false"/> if not.
     /// </returns>
-    /// <exception cref="System.ArgumentNullException">
+    /// <exception cref="ArgumentNullException">
     /// Thrown if <paramref name="app"/> is <see langword="null"/>.
     /// </exception>
     /// <remarks>
@@ -97,7 +97,7 @@ public static class AutofacAppBuilderExtensions
     /// <param name="app">The application builder.</param>
     /// <param name="container">The root Autofac application lifetime scope/container.</param>
     /// <returns>The application builder for continued configuration.</returns>
-    /// <exception cref="System.ArgumentNullException">
+    /// <exception cref="ArgumentNullException">
     /// Thrown if <paramref name="app"/> or <paramref name="container"/> is <see langword="null"/>.
     /// </exception>
     /// <remarks>
@@ -154,7 +154,7 @@ public static class AutofacAppBuilderExtensions
     /// <param name="app">The application builder.</param>
     /// <param name="scopeProvider">The delegate to get the scope (either from passed OWIN context or anywhere else).</param>
     /// <returns>The application builder for continued configuration.</returns>
-    /// <exception cref="System.ArgumentNullException">
+    /// <exception cref="ArgumentNullException">
     /// Thrown if <paramref name="app"/> or <paramref name="scopeProvider"/> is <see langword="null"/>.
     /// </exception>
     /// <remarks>
@@ -216,7 +216,7 @@ public static class AutofacAppBuilderExtensions
     /// <param name="app">The application builder.</param>
     /// <param name="container">The root Autofac application lifetime scope/container.</param>
     /// <returns>The application builder for continued configuration.</returns>
-    /// <exception cref="System.ArgumentNullException">
+    /// <exception cref="ArgumentNullException">
     /// Thrown if <paramref name="app"/> or <paramref name="container"/> is <see langword="null"/>.
     /// </exception>
     /// <remarks>
@@ -269,7 +269,7 @@ public static class AutofacAppBuilderExtensions
     /// <typeparam name="T">The type of middleware to inject.</typeparam>
     /// <param name="app">The application builder.</param>
     /// <returns>The application builder for continued configuration.</returns>
-    /// <exception cref="System.ArgumentNullException">
+    /// <exception cref="ArgumentNullException">
     /// Thrown if <paramref name="app"/> is <see langword="null"/>.
     /// </exception>
     /// <remarks>

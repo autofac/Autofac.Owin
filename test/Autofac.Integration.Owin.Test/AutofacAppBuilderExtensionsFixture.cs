@@ -468,7 +468,7 @@ public class AutofacAppBuilderExtensionsFixture
         {
             CurrentScopeEnding?.Invoke(this, null);
             base.Dispose(disposing);
-            this.ScopeIsDisposed = true;
+            ScopeIsDisposed = true;
         }
 
         public ILifetimeScope BeginLifetimeScope()

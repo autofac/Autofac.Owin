@@ -31,17 +31,17 @@ internal class AutofacMiddleware<T> : OwinMiddleware
         {
             // We pretty well protect against this, but just in case
             // someone's trying to pull a fast one...
-            throw new InvalidOperationException(String.Format(CultureInfo.InvariantCulture, Resources.LifetimeScopeNotFoundWhileInjectingMiddleware, typeof(T)));
+            throw new InvalidOperationException(string.Format(CultureInfo.InvariantCulture, Resources.LifetimeScopeNotFoundWhileInjectingMiddleware, typeof(T)));
         }
 
         T middleware;
         try
         {
-            middleware = lifetimeScope.Resolve<T>(TypedParameter.From(this.Next));
+            middleware = lifetimeScope.Resolve<T>(TypedParameter.From(Next));
         }
         catch (DependencyResolutionException ex)
         {
-            throw new InvalidOperationException(String.Format(CultureInfo.InvariantCulture, Resources.MiddlewareNotRegistered, typeof(T)), ex);
+            throw new InvalidOperationException(string.Format(CultureInfo.InvariantCulture, Resources.MiddlewareNotRegistered, typeof(T)), ex);
         }
 
         return middleware.Invoke(context);
