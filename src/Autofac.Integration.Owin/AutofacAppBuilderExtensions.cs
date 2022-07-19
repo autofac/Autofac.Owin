@@ -366,8 +366,8 @@ namespace Owin
         {
             return app
                 .RegisterAutofacLifetimeScopeInjector(
-                    context =>
-                        container.BeginLifetimeScope(MatchingScopeLifetimeTags.RequestLifetimeScopeTag, b => b.RegisterInstance(context).As<IOwinContext>()), true);
+                    context => container.BeginLifetimeScope(MatchingScopeLifetimeTags.RequestLifetimeScopeTag, b => b.RegisterInstance(context).As<IOwinContext>()),
+                    true);
         }
 
         private static IAppBuilder RegisterAutofacLifetimeScopeInjector(this IAppBuilder app, Func<IOwinContext, ILifetimeScope> scopeProvider, bool dispose)

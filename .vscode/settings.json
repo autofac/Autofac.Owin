@@ -1,4 +1,17 @@
 {
+  "cSpell.words": [
+    "ACTNARS",
+    "autofac",
+    "Browsable",
+    "cref",
+    "langword",
+    "Owin",
+    "paramref",
+    "seealso",
+    "typeparam",
+    "xunit"
+  ],
+  "dotnet-test-explorer.testProjectPath": "test/**/*Test.csproj",
   "omnisharp.enableEditorConfigSupport": true,
   "omnisharp.enableRoslynAnalyzers": true
 }

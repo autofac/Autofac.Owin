@@ -1,4 +1,7 @@
-﻿using System;
+﻿// Copyright (c) Autofac Project. All rights reserved.
+// Licensed under the MIT License. See LICENSE in the project root for license information.
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -115,7 +118,8 @@ namespace Autofac.Integration.Owin.Test
                     ctx.SetAutofacLifetimeScope(lifetimeScope);
                     return next();
                 });
-                //we don't expect anything to be called on this one, so we want it to fail
+
+                // We don't expect anything to be called on this one, so we want it to fail.
                 app.UseAutofacLifetimeScopeInjector(new Mock<ILifetimeScope>(MockBehavior.Strict).Object);
                 app.Use<TestMiddleware>();
                 app.Run(context => context.Response.WriteAsync("Hello, world!"));
@@ -144,6 +148,7 @@ namespace Autofac.Integration.Owin.Test
             {
                 await server.HttpClient.GetAsync("/");
             }
+
             Assert.False(lifetimeScope.ScopeIsDisposed);
         }
 
@@ -155,7 +160,8 @@ namespace Autofac.Integration.Owin.Test
             using (var server = TestServer.Create(app =>
             {
                 app.UseAutofacLifetimeScopeInjector(container);
-                //we don't expect anything to be called on this one, so we want it to fail
+
+                // We don't expect anything to be called on this one, so we want it to fail.
                 app.UseAutofacLifetimeScopeInjector(new Mock<ILifetimeScope>(MockBehavior.Strict).Object);
                 app.Run(context => context.Response.WriteAsync("Hello, world!"));
             }))
@@ -256,7 +262,7 @@ namespace Autofac.Integration.Owin.Test
                 {
                    await server.HttpClient.GetAsync("/");
                 }
-                catch(Exception ex)
+                catch (Exception ex)
                 {
                     Assert.Equal("Test Exception", ex.Message);
                 }
@@ -308,6 +314,7 @@ namespace Autofac.Integration.Owin.Test
             {
                 await server.HttpClient.GetAsync("/");
             }
+
             Assert.False(lifetimeScope.ScopeIsDisposed);
         }
 
@@ -416,14 +423,10 @@ namespace Autofac.Integration.Owin.Test
                 app.UseAutofacLifetimeScopeInjector(new ContainerBuilder().Build());
                 app.Run(context =>
                 {
-                    //we can't directly compare contexts because they are recreated at each step in UseHandlerMidleware
+                    // We can't directly compare contexts because they are recreated at each step in UseHandlerMiddleware.
                     Assert.Same(
                         context.Environment,
-                        context
-                            .GetAutofacLifetimeScope()
-                            .Resolve<IOwinContext>()
-                            .Environment
-                            );
+                        context.GetAutofacLifetimeScope().Resolve<IOwinContext>().Environment);
                     return Task.FromResult(0);
                 });
             }))
@@ -443,8 +446,7 @@ namespace Autofac.Integration.Owin.Test
                     Assert.Null(
                         context
                             .GetAutofacLifetimeScope()
-                            .ResolveOptional<IOwinContext>()
-                    );
+                            .ResolveOptional<IOwinContext>());
                     return Task.FromResult(0);
                 });
             }))
@@ -468,7 +470,9 @@ namespace Autofac.Integration.Owin.Test
             }
 
             public event EventHandler<LifetimeScopeBeginningEventArgs> ChildLifetimeScopeBeginning;
+
             public event EventHandler<LifetimeScopeEndingEventArgs> CurrentScopeEnding;
+
             public event EventHandler<ResolveOperationBeginningEventArgs> ResolveOperationBeginning;
 
             protected override void Dispose(bool disposing)

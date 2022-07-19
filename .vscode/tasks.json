@@ -3,6 +3,7 @@
     {
       "args": [
         "build",
+        "${workspaceFolder}/Autofac.Owin.sln",
         "/property:GenerateFullPaths=true",
         "/consoleloggerparameters:NoSummary"
       ],
