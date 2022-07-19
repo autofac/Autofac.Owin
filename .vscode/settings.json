@@ -4,6 +4,7 @@
     "autofac",
     "browsable",
     "cref",
+    "inheritdoc",
     "langword",
     "notnull",
     "owin",
