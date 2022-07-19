@@ -24,6 +24,10 @@
   <ItemGroup>
     <ProjectReference Include="..\..\src\Autofac.Integration.Owin\Autofac.Integration.Owin.csproj" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\build\icon.png" Pack="true" PackagePath="\" />
+    <None Include="..\..\README.md" Pack="true" PackagePath="\" />
+  </ItemGroup>
 
   <ItemGroup>
     <AdditionalFiles Include="..\..\build\stylecop.json" Link="stylecop.json" />
