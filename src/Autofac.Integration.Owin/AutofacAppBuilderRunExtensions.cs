@@ -39,6 +39,7 @@ namespace Owin
         /// </example>
         /// <seealso cref="AutofacAppBuilderExtensions.UseAutofacLifetimeScopeInjector(IAppBuilder, ILifetimeScope)"/>
         public static void RunFromContainer<T>(this IAppBuilder app, Func<T, IOwinContext, Task> handler)
+            where T : notnull
         {
             if (app == null)
             {
