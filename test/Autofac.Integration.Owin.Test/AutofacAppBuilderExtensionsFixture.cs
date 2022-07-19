@@ -1,23 +1,12 @@
 ﻿// Copyright (c) Autofac Project. All rights reserved.
 // Licensed under the MIT License. See LICENSE in the project root for license information.
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 using Autofac.Core;
 using Autofac.Core.Lifetime;
-using Autofac.Core.Registration;
 using Autofac.Core.Resolving;
 using Autofac.Features.ResolveAnything;
 using Autofac.Util;
-using Microsoft.Owin;
 using Microsoft.Owin.Builder;
-using Microsoft.Owin.Testing;
-using Moq;
-using Owin;
-using Xunit;
 
 namespace Autofac.Integration.Owin.Test
 {

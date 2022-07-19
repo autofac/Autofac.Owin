@@ -1,18 +1,13 @@
 ﻿// Copyright (c) Autofac Project. All rights reserved.
 // Licensed under the MIT License. See LICENSE in the project root for license information.
 
-using System;
-using System.Collections.Generic;
 using System.ComponentModel;
 using System.Globalization;
-using System.Linq;
-using System.Threading;
 using Autofac;
 using Autofac.Core;
 using Autofac.Core.Lifetime;
 using Autofac.Integration.Owin;
 using Autofac.Integration.Owin.Properties;
-using Microsoft.Owin;
 
 namespace Owin
 {
@@ -129,7 +124,7 @@ namespace Owin
         ///   .UseBasicAuthentication()
         ///   .Use((c, next) =&gt;
         ///   {
-        ///     //authorization
+        ///     // authorization
         ///     return next();
         ///   })
         ///   .UseMiddlewareFromContainer&lt;PathRewriter&gt;()

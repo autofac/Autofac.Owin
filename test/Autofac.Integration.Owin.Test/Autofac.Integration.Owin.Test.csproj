@@ -14,7 +14,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Using Include="Microsoft.Owin" />
+    <Using Include="Microsoft.Owin.Testing" />
     <Using Include="Moq" />
+    <Using Include="Owin" />
     <Using Include="Xunit" />
   </ItemGroup>
 

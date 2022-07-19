@@ -1,15 +1,6 @@
 ﻿// Copyright (c) Autofac Project. All rights reserved.
 // Licensed under the MIT License. See LICENSE in the project root for license information.
 
-using System;
-using System.Collections;
-using System.Collections.Generic;
-using Microsoft.Owin;
-using Microsoft.Owin.Testing;
-using Moq;
-using Owin;
-using Xunit;
-
 namespace Autofac.Integration.Owin.Test
 {
     public class OwinContextExtensionsFixture
