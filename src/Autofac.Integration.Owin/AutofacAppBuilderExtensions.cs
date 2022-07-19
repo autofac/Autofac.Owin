@@ -388,9 +388,9 @@ namespace Owin
                 }
                 finally
                 {
-                    if (dispose)
+                    if (dispose && lifetimeScope != null)
                     {
-                        lifetimeScope?.Dispose();
+                        await lifetimeScope.DisposeAsync();
                     }
 
                     context.RemoveAutofacLifetimeScope();
