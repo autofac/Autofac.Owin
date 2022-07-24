@@ -338,6 +338,7 @@ public static class AutofacAppBuilderExtensions
         return container.ComponentRegistry.Registrations.SelectMany(r => r.Services)
             .OfType<TypedService>()
             .Where(s => IsMiddlewareButNotAutofac(s.ServiceType))
+            .OrderBy(s => container.ComponentRegistry.TryGetServiceRegistration(s, out var reg) ? reg.GetRegistrationOrder() : 0)
             .Select(service => typeof(AutofacMiddleware<>).MakeGenericType(service.ServiceType))
             .ToArray();
     }
