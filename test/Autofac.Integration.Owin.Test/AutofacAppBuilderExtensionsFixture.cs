@@ -473,20 +473,14 @@ public class AutofacAppBuilderExtensionsFixture
 
     public class TracingTestMiddleware<T> : OwinMiddleware
     {
-        private readonly List<int> _order;
-        private readonly int _orderNumber;
-
-        public TracingTestMiddleware(OwinMiddleware next, List<int> order, int orderNumber)
+        public TracingTestMiddleware(OwinMiddleware next)
             : base(next)
         {
-            _order = order;
-            _orderNumber = orderNumber;
         }
 
         public override Task Invoke(IOwinContext context)
         {
-            _order.Add(_orderNumber);
-            return Next.Invoke(context);
+            throw new NotImplementedException();
         }
     }
 
