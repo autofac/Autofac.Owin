@@ -444,6 +444,52 @@ public class AutofacAppBuilderExtensionsFixture
         }
     }
 
+    [Fact]
+    public void UseAutofacMiddlewareAddsMiddlewareInTheCorrectOrder()
+    {
+        var builder = new ContainerBuilder();
+
+        var traceSet = new List<Type>();
+
+        builder.RegisterType<TracingTestMiddleware<int>>();
+        builder.RegisterType<TracingTestMiddleware<bool>>();
+        builder.RegisterType<TracingTestMiddleware<string>>();
+
+        var container = builder.Build();
+        var app = new Mock<IAppBuilder>();
+        app.Setup(mock => mock.Properties).Returns(new Dictionary<string, object>());
+        app.Setup(mock => mock.Use(It.IsAny<object>()))
+           .Callback<object, object[]>((m, _) => traceSet.Add((Type)m));
+        app.SetReturnsDefault(app.Object);
+
+        app.Object.UseAutofacMiddleware(container);
+
+        Assert.Collection(
+            traceSet,
+            item => Assert.Equal(typeof(AutofacMiddleware<TracingTestMiddleware<int>>), item),
+            item => Assert.Equal(typeof(AutofacMiddleware<TracingTestMiddleware<bool>>), item),
+            item => Assert.Equal(typeof(AutofacMiddleware<TracingTestMiddleware<string>>), item));
+    }
+
+    public class TracingTestMiddleware<T> : OwinMiddleware
+    {
+        private readonly List<int> _order;
+        private readonly int _orderNumber;
+
+        public TracingTestMiddleware(OwinMiddleware next, List<int> order, int orderNumber)
+            : base(next)
+        {
+            _order = order;
+            _orderNumber = orderNumber;
+        }
+
+        public override Task Invoke(IOwinContext context)
+        {
+            _order.Add(_orderNumber);
+            return Next.Invoke(context);
+        }
+    }
+
     public class TestableLifetimeScope : Disposable, ILifetimeScope
     {
         public bool ScopeIsDisposed { get; set; }
