@@ -4,15 +4,21 @@
   <Rules AnalyzerId="Microsoft.Usage" RuleNamespace="Microsoft.Usage">
     <!-- Implement standard exception constructors - not all of the exception constructors (e.g., parameterless) are desired in our system. -->
     <Rule Id="CA1032" Action="None" />
+    <!-- Remove the underscores from member name - unit test scenarios may use underscores. -->
+    <Rule Id="CA1707" Action="None" />
     <!-- Change names to avoid reserved word overlaps (e.g., Delegate, GetType, etc.) - too many of these in the public API, we'd break if we fixed it. -->
     <Rule Id="CA1716" Action="None" />
     <!-- Change Dispose() to call GC.SuppressFinalize - in tests we don't really care and it can impact readability. -->
     <Rule Id="CA1816" Action="None" />
     <!-- Mark members static - test methods may not access member data but also can't be static. -->
     <Rule Id="CA1822" Action="None" />
-    <!-- Implement serialization constructors - false positive when building .NET Core -->
+    <!-- Do not directly await a task - this is for libraries rather than test code. -->
+    <Rule Id="CA2007" Action="None" />
+    <!-- Implement serialization constructors - false positive when building .NET Core. -->
     <Rule Id="CA2229" Action="None" />
-    <!-- Mark ISerializable types with SerializableAttribute - false positive when building .NET Core -->
+    <!-- Use Uri instead of string parameters - strings are easier for testing. -->
+    <Rule Id="CA2234" Action="None" />
+    <!-- Mark ISerializable types with SerializableAttribute - false positive when building .NET Core. -->
     <Rule Id="CA2237" Action="None" />
   </Rules>
   <Rules AnalyzerId="StyleCop.Analyzers" RuleNamespace="StyleCop.Analyzers">

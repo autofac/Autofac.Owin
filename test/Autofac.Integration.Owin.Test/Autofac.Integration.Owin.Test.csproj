@@ -8,6 +8,7 @@
     <SignAssembly>true</SignAssembly>
     <GenerateRuntimeConfigurationFiles>true</GenerateRuntimeConfigurationFiles>
     <CodeAnalysisRuleSet>../../build/Test.ruleset</CodeAnalysisRuleSet>
+    <AnalysisMode>AllEnabledByDefault</AnalysisMode>
     <IsPackable>false</IsPackable>
     <LangVersion>latest</LangVersion>
     <ImplicitUsings>enable</ImplicitUsings>
@@ -23,10 +24,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\Autofac.Integration.Owin\Autofac.Integration.Owin.csproj" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="..\..\build\icon.png" Pack="true" PackagePath="\" />
-    <None Include="..\..\README.md" Pack="true" PackagePath="\" />
   </ItemGroup>
 
   <ItemGroup>
