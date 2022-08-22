@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Autofac Project. All rights reserved.
 // Licensed under the MIT License. See LICENSE in the project root for license information.
 
+using System.Diagnostics.CodeAnalysis;
 using Autofac.Core;
 using Autofac.Core.Lifetime;
 using Autofac.Core.Resolving;
@@ -17,7 +18,7 @@ public class AutofacAppBuilderExtensionsFixture
     {
         var app = new AppBuilder();
         var tcs = new CancellationTokenSource();
-        var scope = new TestableLifetimeScope();
+        using var scope = new TestableLifetimeScope();
         app.Properties.Add("host.OnAppDisposing", tcs.Token);
 
         app.DisposeScopeOnAppDisposing(scope);
@@ -31,7 +32,7 @@ public class AutofacAppBuilderExtensionsFixture
     public void DisposeScopeOnAppDisposingDoesNothingWhenNoTokenPresent()
     {
         var app = new AppBuilder();
-        var scope = new TestableLifetimeScope();
+        using var scope = new TestableLifetimeScope();
 
         // XUnit doesn't have Assert.DoesNotThrow
         app.DisposeScopeOnAppDisposing(scope);
@@ -99,7 +100,7 @@ public class AutofacAppBuilderExtensionsFixture
     [Fact]
     public async void UseAutofacLifetimeScopeInjectorDoesntOverrideScopeSetBySetAutofacLifetimeScope()
     {
-        var lifetimeScope = new TestableLifetimeScope();
+        using var lifetimeScope = new TestableLifetimeScope();
         using (var server = TestServer.Create(app =>
         {
             app.Use((ctx, next) =>
@@ -122,7 +123,7 @@ public class AutofacAppBuilderExtensionsFixture
     [Fact]
     public async void UseAutofacLifetimeScopeInjectorDoesntDisposeScopeSetBySetAutofacLifetimeScope()
     {
-        var lifetimeScope = new TestableLifetimeScope();
+        using var lifetimeScope = new TestableLifetimeScope();
         using (var server = TestServer.Create(app =>
         {
             app.Use((ctx, next) =>
@@ -243,7 +244,7 @@ public class AutofacAppBuilderExtensionsFixture
             app.Use((ctx, next) =>
             {
                 Assert.True(ctx.Environment.ContainsKey(Constants.OwinLifetimeScopeKey));
-                throw new Exception("Test Exception");
+                throw new InvalidOperationException("Test Exception");
             });
         }))
         {
@@ -251,7 +252,7 @@ public class AutofacAppBuilderExtensionsFixture
             {
                await server.HttpClient.GetAsync("/");
             }
-            catch (Exception ex)
+            catch (InvalidOperationException ex)
             {
                 Assert.Equal("Test Exception", ex.Message);
             }
@@ -261,7 +262,7 @@ public class AutofacAppBuilderExtensionsFixture
     [Fact]
     public async void UseAutofacLifetimeScopeInjectorWithExternalScopeAddsItToOwinContext()
     {
-        var lifetimeScope = new TestableLifetimeScope();
+        using var lifetimeScope = new TestableLifetimeScope();
         using (var server = TestServer.Create(app =>
         {
             app.UseAutofacLifetimeScopeInjector(ctx => lifetimeScope);
@@ -294,7 +295,7 @@ public class AutofacAppBuilderExtensionsFixture
     [Fact]
     public async void UseAutofacLifetimeScopeInjectorWithExternalScopeDoesntDisposeIt()
     {
-        var lifetimeScope = new TestableLifetimeScope();
+        using var lifetimeScope = new TestableLifetimeScope();
         using (var server = TestServer.Create(app =>
         {
             app.UseAutofacLifetimeScopeInjector(ctx => lifetimeScope);
@@ -471,7 +472,8 @@ public class AutofacAppBuilderExtensionsFixture
             item => Assert.Equal(typeof(AutofacMiddleware<TracingTestMiddleware<string>>), item));
     }
 
-    public class TracingTestMiddleware<T> : OwinMiddleware
+    [SuppressMessage("CA1812", "CA1812", Justification = "Middleware is instantiated based on being a type parameter.")]
+    private class TracingTestMiddleware<T> : OwinMiddleware
     {
         public TracingTestMiddleware(OwinMiddleware next)
             : base(next)
@@ -484,15 +486,15 @@ public class AutofacAppBuilderExtensionsFixture
         }
     }
 
-    public class TestableLifetimeScope : Disposable, ILifetimeScope
+    private class TestableLifetimeScope : Disposable, ILifetimeScope
     {
         public bool ScopeIsDisposed { get; set; }
 
-        public IDisposer Disposer => throw new NotImplementedException();
+        public IDisposer Disposer => null;
 
-        public object Tag => throw new NotImplementedException();
+        public object Tag => null;
 
-        public IComponentRegistry ComponentRegistry => throw new NotImplementedException();
+        public IComponentRegistry ComponentRegistry => null;
 
         public TestableLifetimeScope()
         {

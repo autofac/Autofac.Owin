@@ -36,7 +36,7 @@ public class AutofacAppBuilderRunExtensionsFixture
         instance.Verify();
     }
 
-    public interface ITestComponent
+    private interface ITestComponent
     {
         Task InvokeAsync(IOwinContext owinContext);
     }
