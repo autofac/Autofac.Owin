@@ -10,8 +10,8 @@
 
 namespace Autofac.Integration.Owin.Properties {
     using System;
-    
-    
+
+
     /// <summary>
     ///   A strongly-typed resource class, for looking up localized strings, etc.
     /// </summary>
@@ -23,15 +23,15 @@ namespace Autofac.Integration.Owin.Properties {
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
     internal class Resources {
-        
+
         private static global::System.Resources.ResourceManager resourceMan;
-        
+
         private static global::System.Globalization.CultureInfo resourceCulture;
-        
+
         [global::System.Diagnostics.CodeAnalysis.SuppressMessageAttribute("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
         internal Resources() {
         }
-        
+
         /// <summary>
         ///   Returns the cached ResourceManager instance used by this class.
         /// </summary>
@@ -45,7 +45,7 @@ namespace Autofac.Integration.Owin.Properties {
                 return resourceMan;
             }
         }
-        
+
         /// <summary>
         ///   Overrides the current thread's CurrentUICulture property for all
         ///   resource lookups using this strongly typed resource class.
@@ -59,7 +59,7 @@ namespace Autofac.Integration.Owin.Properties {
                 resourceCulture = value;
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to The Autofac lifetime scope injector was not found while trying to add injected middleware type &apos;{0}&apos; to the pipeline. Make sure you use app.UseAutofacMiddleware()  to register the lifetime scope injector and middleware at the same time; or app.UseAutofacLifetimeScopeInjector() before registering injected middleware if separating the scope injector from injected middleware..
         /// </summary>
@@ -68,7 +68,7 @@ namespace Autofac.Integration.Owin.Properties {
                 return ResourceManager.GetString("LifetimeScopeInjectorNotFoundWhileRegisteringMiddleware", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to No Autofac lifetime scope was found while trying to invoke injected middleware type &apos;{0}&apos;. Make sure you use app.UseAutofacMiddleware()  to register the lifetime scope injector and middleware at the same time; or app.UseAutofacLifetimeScopeInjector() if separating the scope injector from injected middleware..
         /// </summary>
@@ -77,7 +77,7 @@ namespace Autofac.Integration.Owin.Properties {
                 return ResourceManager.GetString("LifetimeScopeNotFoundWhileInjectingMiddleware", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to The middleware type &apos;{0}&apos; was registered with the application using Autofac but that type was not able to be resolved from the lifetime scope. Check your container registrations to ensure that &apos;{0}&apos; is registered. See the inner exception for details on what failed during resolution..
         /// </summary>
