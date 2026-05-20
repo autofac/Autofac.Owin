@@ -250,7 +250,7 @@ public class AutofacAppBuilderExtensionsFixture
         {
             try
             {
-               await server.HttpClient.GetAsync("/");
+                await server.HttpClient.GetAsync("/");
             }
             catch (InvalidOperationException ex)
             {
