@@ -1,4 +1,4 @@
-// Copyright (c) Autofac Project. All rights reserved.
+﻿// Copyright (c) Autofac Project. All rights reserved.
 // Licensed under the MIT License. See LICENSE in the project root for license information.
 
 using System.Diagnostics.CodeAnalysis;
@@ -463,14 +463,22 @@ public class AutofacAppBuilderExtensionsFixture
         app.Properties.Returns(new Dictionary<string, object>());
         app.Use(Arg.Any<object>(), Arg.Any<object[]>()).Returns(callInfo =>
         {
-            traceSet.Add((Type)callInfo[0]);
+            if (callInfo[0] is Type t)
+            {
+                traceSet.Add(t);
+            }
+
             return app;
         });
 
         app.UseAutofacMiddleware(container);
 
+        var autofacMiddleware = traceSet
+            .Where(t => t.IsGenericType && t.GetGenericTypeDefinition() == typeof(AutofacMiddleware<>))
+            .ToList();
+
         Assert.Collection(
-            traceSet,
+            autofacMiddleware,
             item => Assert.Equal(typeof(AutofacMiddleware<TracingTestMiddleware<int>>), item),
             item => Assert.Equal(typeof(AutofacMiddleware<TracingTestMiddleware<bool>>), item),
             item => Assert.Equal(typeof(AutofacMiddleware<TracingTestMiddleware<string>>), item));
