@@ -8,10 +8,9 @@ public class OwinContextExtensionsFixture
     [Fact]
     public void GetAutofacLifetimeScopeReturnsInstanceFromContext()
     {
-        var context = new Mock<IOwinContext>();
-        context.Setup(mock => mock.Get<ILifetimeScope>(Constants.OwinLifetimeScopeKey));
-        context.Object.GetAutofacLifetimeScope();
-        context.VerifyAll();
+        var context = Substitute.For<IOwinContext>();
+        context.GetAutofacLifetimeScope();
+        context.Received().Get<ILifetimeScope>(Constants.OwinLifetimeScopeKey);
     }
 
     [Fact]
@@ -31,18 +30,17 @@ public class OwinContextExtensionsFixture
     [Fact]
     public void SetAutofacLifetimeScopeSetsInstanceToContext()
     {
-        var instance = new Mock<ILifetimeScope>();
+        var instance = Substitute.For<ILifetimeScope>();
 
-        var context = new Mock<IOwinContext>();
-        context.Setup(mock => mock.Set(Constants.OwinLifetimeScopeKey, instance.Object));
-        context.Object.SetAutofacLifetimeScope(instance.Object);
-        context.VerifyAll();
+        var context = Substitute.For<IOwinContext>();
+        context.SetAutofacLifetimeScope(instance);
+        context.Received().Set(Constants.OwinLifetimeScopeKey, instance);
     }
 
     [Fact]
     public void SetAutofacLifetimeScopeThrowsWhenProvidedNullContextInstance()
     {
-        var exception = Assert.Throws<ArgumentNullException>(() => OwinContextExtensions.SetAutofacLifetimeScope(null, new Mock<ILifetimeScope>().Object));
+        var exception = Assert.Throws<ArgumentNullException>(() => OwinContextExtensions.SetAutofacLifetimeScope(null, Substitute.For<ILifetimeScope>()));
         Assert.Equal("context", exception.ParamName);
     }
 
@@ -56,7 +54,7 @@ public class OwinContextExtensionsFixture
     [Fact]
     public void GetAutofacLifetimeScopeReturnsTheInstanceFromSetLifetimeScope()
     {
-        var instance = new Mock<ILifetimeScope>().Object;
+        var instance = Substitute.For<ILifetimeScope>();
         var context = new OwinContext();
         context.SetAutofacLifetimeScope(instance);
         Assert.Same(instance, context.GetAutofacLifetimeScope());
@@ -65,17 +63,16 @@ public class OwinContextExtensionsFixture
     [Fact]
     public void RemoveAutofacLifetimeScopeRemovesScopeFromContext()
     {
-        var scope = new Mock<ILifetimeScope>().Object;
-        var context = new Mock<IOwinContext>();
-        var environment = new Mock<IDictionary<string, object>>();
+        var scope = Substitute.For<ILifetimeScope>();
+        var context = Substitute.For<IOwinContext>();
+        var environment = Substitute.For<IDictionary<string, object>>();
 
-        context.Setup(mock => mock.Set(Constants.OwinLifetimeScopeKey, scope));
-        context.Setup(mock => mock.Environment).Returns(environment.Object);
-        environment.Setup(mock => mock.Remove(Constants.OwinLifetimeScopeKey));
-        context.Object.SetAutofacLifetimeScope(scope);
-        context.Object.RemoveAutofacLifetimeScope();
+        context.Environment.Returns(environment);
+        context.SetAutofacLifetimeScope(scope);
+        context.RemoveAutofacLifetimeScope();
 
-        context.VerifyAll();
+        context.Received().Set(Constants.OwinLifetimeScopeKey, scope);
+        environment.Received().Remove(Constants.OwinLifetimeScopeKey);
     }
 
     [Fact]
@@ -88,12 +85,12 @@ public class OwinContextExtensionsFixture
     [Fact]
     public async void ScopeSetBySetAutofacLifetimeScopeIsNotDisposed()
     {
-        var lifetimeScope = new Mock<ILifetimeScope>();
+        var lifetimeScope = Substitute.For<ILifetimeScope>();
         using (var server = TestServer.Create(app =>
         {
             app.Use((ctx, next) =>
             {
-                ctx.SetAutofacLifetimeScope(lifetimeScope.Object);
+                ctx.SetAutofacLifetimeScope(lifetimeScope);
                 return next();
             });
             app.Run(context => context.Response.WriteAsync("Hello, world!"));
@@ -102,6 +99,6 @@ public class OwinContextExtensionsFixture
             await server.HttpClient.GetAsync("/");
         }
 
-        lifetimeScope.Verify(s => s.Dispose(), Times.Never);
+        lifetimeScope.DidNotReceive().Dispose();
     }
 }

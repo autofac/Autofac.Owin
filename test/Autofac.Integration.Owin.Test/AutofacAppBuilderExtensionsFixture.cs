@@ -110,7 +110,8 @@ public class AutofacAppBuilderExtensionsFixture
             });
 
             // We don't expect anything to be called on this one, so we want it to fail.
-            app.UseAutofacLifetimeScopeInjector(new Mock<ILifetimeScope>(MockBehavior.Strict).Object);
+            var strictScope = Substitute.For<ILifetimeScope>();
+            app.UseAutofacLifetimeScopeInjector(strictScope);
             app.Use<TestMiddleware>();
             app.Run(context => context.Response.WriteAsync("Hello, world!"));
         }))
@@ -131,7 +132,8 @@ public class AutofacAppBuilderExtensionsFixture
                 ctx.SetAutofacLifetimeScope(lifetimeScope);
                 return next();
             });
-            app.UseAutofacLifetimeScopeInjector(new Mock<ILifetimeScope>(MockBehavior.Strict).Object);
+            var strictScope = Substitute.For<ILifetimeScope>();
+            app.UseAutofacLifetimeScopeInjector(strictScope);
             app.Use<TestMiddleware>();
             app.Run(context => context.Response.WriteAsync("Hello, world!"));
         }))
@@ -152,7 +154,8 @@ public class AutofacAppBuilderExtensionsFixture
             app.UseAutofacLifetimeScopeInjector(container);
 
             // We don't expect anything to be called on this one, so we want it to fail.
-            app.UseAutofacLifetimeScopeInjector(new Mock<ILifetimeScope>(MockBehavior.Strict).Object);
+            var strictScope = Substitute.For<ILifetimeScope>();
+            app.UseAutofacLifetimeScopeInjector(strictScope);
             app.Run(context => context.Response.WriteAsync("Hello, world!"));
         }))
         {
@@ -165,8 +168,8 @@ public class AutofacAppBuilderExtensionsFixture
     {
         var container = new ContainerBuilder().Build();
 
-        var disposable = new Mock<IDisposable>();
-        var asyncDisposable = new Mock<IAsyncDisposable>();
+        var disposable = Substitute.For<IDisposable>();
+        var asyncDisposable = Substitute.For<IAsyncDisposable>();
 
         using (var server = TestServer.Create(app =>
         {
@@ -175,8 +178,8 @@ public class AutofacAppBuilderExtensionsFixture
             {
                 var disposer = ctx.GetAutofacLifetimeScope().Disposer;
 
-                disposer.AddInstanceForDisposal(disposable.Object);
-                disposer.AddInstanceForAsyncDisposal(asyncDisposable.Object);
+                disposer.AddInstanceForDisposal(disposable);
+                disposer.AddInstanceForAsyncDisposal(asyncDisposable);
 
                 return next();
             });
@@ -186,8 +189,8 @@ public class AutofacAppBuilderExtensionsFixture
             await server.HttpClient.GetAsync("/");
         }
 
-        disposable.Verify(d => d.Dispose());
-        asyncDisposable.Verify(d => d.DisposeAsync());
+        disposable.Received().Dispose();
+        await asyncDisposable.Received().DisposeAsync();
     }
 
     [Fact]
@@ -283,7 +286,7 @@ public class AutofacAppBuilderExtensionsFixture
             app.UseAutofacLifetimeScopeInjector(ctx =>
             {
                 Assert.IsAssignableFrom<IOwinContext>(ctx);
-                return new Mock<ILifetimeScope>().Object;
+                return Substitute.For<ILifetimeScope>();
             });
             app.Run(context => context.Response.WriteAsync("Hello, world!"));
         }))
@@ -314,25 +317,25 @@ public class AutofacAppBuilderExtensionsFixture
         var builder = new ContainerBuilder();
         builder.RegisterType<TestMiddleware>();
         var container = builder.Build();
-        var app = new Mock<IAppBuilder>();
-        app.Setup(mock => mock.Properties).Returns(new Dictionary<string, object>());
-        app.SetReturnsDefault(app.Object);
+        var app = Substitute.For<IAppBuilder>();
+        app.Properties.Returns(new Dictionary<string, object>());
+        app.Use(Arg.Any<object>(), Arg.Any<object[]>()).Returns(app);
 
-        app.Object.UseAutofacLifetimeScopeInjector(container);
+        app.UseAutofacLifetimeScopeInjector(container);
 
-        app.Verify(mock => mock.Use(It.IsAny<AutofacMiddleware<TestMiddleware>>(), It.IsAny<object[]>()), Times.Never);
+        app.DidNotReceive().Use(Arg.Is<object>(o => o is AutofacMiddleware<TestMiddleware>), Arg.Any<object[]>());
     }
 
     [Fact]
     public void UseAutofacLifetimeScopeInjectorShowsInjectorRegistered()
     {
-        var app = new Mock<IAppBuilder>();
-        app.Setup(mock => mock.Properties).Returns(new Dictionary<string, object>());
-        app.SetReturnsDefault(app.Object);
+        var app = Substitute.For<IAppBuilder>();
+        app.Properties.Returns(new Dictionary<string, object>());
+        app.Use(Arg.Any<object>(), Arg.Any<object[]>()).Returns(app);
 
         var container = new ContainerBuilder().Build();
-        app.Object.UseAutofacLifetimeScopeInjector(container);
-        Assert.True(app.Object.IsAutofacLifetimeScopeInjectorRegistered());
+        app.UseAutofacLifetimeScopeInjector(container);
+        Assert.True(app.IsAutofacLifetimeScopeInjectorRegistered());
     }
 
     [Fact]
@@ -359,50 +362,49 @@ public class AutofacAppBuilderExtensionsFixture
         var builder = new ContainerBuilder();
         builder.RegisterType<TestMiddleware>();
         var container = builder.Build();
-        var app = new Mock<IAppBuilder>();
-        app.Setup(mock => mock.Properties).Returns(new Dictionary<string, object>());
-        app.Setup(mock => mock.Use(typeof(AutofacMiddleware<TestMiddleware>)));
-        app.SetReturnsDefault(app.Object);
+        var app = Substitute.For<IAppBuilder>();
+        app.Properties.Returns(new Dictionary<string, object>());
+        app.Use(Arg.Any<object>(), Arg.Any<object[]>()).Returns(app);
 
-        app.Object.UseAutofacMiddleware(container);
+        app.UseAutofacMiddleware(container);
 
-        app.VerifyAll();
+        app.Received().Use(typeof(AutofacMiddleware<TestMiddleware>));
     }
 
     [Fact]
     public void UseAutofacMiddlewareShowsInjectorRegistered()
     {
-        var app = new Mock<IAppBuilder>();
-        app.Setup(mock => mock.Properties).Returns(new Dictionary<string, object>());
-        app.SetReturnsDefault(app.Object);
+        var app = Substitute.For<IAppBuilder>();
+        app.Properties.Returns(new Dictionary<string, object>());
+        app.Use(Arg.Any<object>(), Arg.Any<object[]>()).Returns(app);
 
         var container = new ContainerBuilder().Build();
-        app.Object.UseAutofacMiddleware(container);
-        Assert.True(app.Object.IsAutofacLifetimeScopeInjectorRegistered());
+        app.UseAutofacMiddleware(container);
+        Assert.True(app.IsAutofacLifetimeScopeInjectorRegistered());
     }
 
     [Fact]
     public void UseMiddlewareFromContainerAddsSingleWrappedMiddlewareInstanceToAppBuilder()
     {
-        var app = new Mock<IAppBuilder>();
-        app.Setup(mock => mock.Properties).Returns(new Dictionary<string, object>());
-        app.SetReturnsDefault(app.Object);
+        var app = Substitute.For<IAppBuilder>();
+        app.Properties.Returns(new Dictionary<string, object>());
+        app.Use(Arg.Any<object>(), Arg.Any<object[]>()).Returns(app);
 
         var container = new ContainerBuilder().Build();
-        app.Object.UseAutofacLifetimeScopeInjector(container);
-        app.Object.UseMiddlewareFromContainer<TestMiddleware>();
+        app.UseAutofacLifetimeScopeInjector(container);
+        app.UseMiddlewareFromContainer<TestMiddleware>();
 
-        app.Verify(mock => mock.Use(typeof(AutofacMiddleware<TestMiddleware>)), Times.Once);
+        app.Received(1).Use(typeof(AutofacMiddleware<TestMiddleware>));
     }
 
     [Fact]
     public void UseMiddlewareFromContainerRequiresInjectorRegistrationFirst()
     {
-        var app = new Mock<IAppBuilder>();
-        app.Setup(mock => mock.Properties).Returns(new Dictionary<string, object>());
-        app.SetReturnsDefault(app.Object);
+        var app = Substitute.For<IAppBuilder>();
+        app.Properties.Returns(new Dictionary<string, object>());
+        app.Use(Arg.Any<object>(), Arg.Any<object[]>()).Returns(app);
 
-        Assert.Throws<InvalidOperationException>(() => app.Object.UseMiddlewareFromContainer<TestMiddleware>());
+        Assert.Throws<InvalidOperationException>(() => app.UseMiddlewareFromContainer<TestMiddleware>());
     }
 
     [Fact]
@@ -457,16 +459,26 @@ public class AutofacAppBuilderExtensionsFixture
         builder.RegisterType<TracingTestMiddleware<string>>();
 
         var container = builder.Build();
-        var app = new Mock<IAppBuilder>();
-        app.Setup(mock => mock.Properties).Returns(new Dictionary<string, object>());
-        app.Setup(mock => mock.Use(It.IsAny<object>()))
-           .Callback<object, object[]>((m, _) => traceSet.Add((Type)m));
-        app.SetReturnsDefault(app.Object);
+        var app = Substitute.For<IAppBuilder>();
+        app.Properties.Returns(new Dictionary<string, object>());
+        app.Use(Arg.Any<object>(), Arg.Any<object[]>()).Returns(callInfo =>
+        {
+            if (callInfo[0] is Type t)
+            {
+                traceSet.Add(t);
+            }
 
-        app.Object.UseAutofacMiddleware(container);
+            return app;
+        });
+
+        app.UseAutofacMiddleware(container);
+
+        var autofacMiddleware = traceSet
+            .Where(t => t.IsGenericType && t.GetGenericTypeDefinition() == typeof(AutofacMiddleware<>))
+            .ToList();
 
         Assert.Collection(
-            traceSet,
+            autofacMiddleware,
             item => Assert.Equal(typeof(AutofacMiddleware<TracingTestMiddleware<int>>), item),
             item => Assert.Equal(typeof(AutofacMiddleware<TracingTestMiddleware<bool>>), item),
             item => Assert.Equal(typeof(AutofacMiddleware<TracingTestMiddleware<string>>), item));
