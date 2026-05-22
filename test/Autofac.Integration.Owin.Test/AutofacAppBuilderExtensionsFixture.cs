@@ -79,7 +79,7 @@ public class AutofacAppBuilderExtensionsFixture
     }
 
     [Fact]
-    public async void UseAutofacLifetimeScopeInjectorAddsChildLifetimeScopeToOwinContext()
+    public async Task UseAutofacLifetimeScopeInjectorAddsChildLifetimeScopeToOwinContext()
     {
         var builder = new ContainerBuilder();
         builder.RegisterType<TestMiddleware>();
@@ -98,7 +98,7 @@ public class AutofacAppBuilderExtensionsFixture
     }
 
     [Fact]
-    public async void UseAutofacLifetimeScopeInjectorDoesntOverrideScopeSetBySetAutofacLifetimeScope()
+    public async Task UseAutofacLifetimeScopeInjectorDoesntOverrideScopeSetBySetAutofacLifetimeScope()
     {
         using var lifetimeScope = new TestableLifetimeScope();
         using (var server = TestServer.Create(app =>
@@ -122,7 +122,7 @@ public class AutofacAppBuilderExtensionsFixture
     }
 
     [Fact]
-    public async void UseAutofacLifetimeScopeInjectorDoesntDisposeScopeSetBySetAutofacLifetimeScope()
+    public async Task UseAutofacLifetimeScopeInjectorDoesntDisposeScopeSetBySetAutofacLifetimeScope()
     {
         using var lifetimeScope = new TestableLifetimeScope();
         using (var server = TestServer.Create(app =>
@@ -145,7 +145,7 @@ public class AutofacAppBuilderExtensionsFixture
     }
 
     [Fact]
-    public async void UseAutofacLifetimeScopeInjectorDoesntAddLifetimeScopeToOwinContextIfAlreadyPresent()
+    public async Task UseAutofacLifetimeScopeInjectorDoesntAddLifetimeScopeToOwinContextIfAlreadyPresent()
     {
         var container = new ContainerBuilder().Build();
 
@@ -164,7 +164,7 @@ public class AutofacAppBuilderExtensionsFixture
     }
 
     [Fact]
-    public async void UseAutofacLifetimeScopeInjectorDisposesIt()
+    public async Task UseAutofacLifetimeScopeInjectorDisposesIt()
     {
         var container = new ContainerBuilder().Build();
 
@@ -194,7 +194,7 @@ public class AutofacAppBuilderExtensionsFixture
     }
 
     [Fact]
-    public async void RemoveAutofacLifetimeScopeAfterUse()
+    public async Task RemoveAutofacLifetimeScopeAfterUse()
     {
         var builder = new ContainerBuilder();
         builder.RegisterType<TestMiddleware>();
@@ -228,7 +228,7 @@ public class AutofacAppBuilderExtensionsFixture
     }
 
     [Fact]
-    public async void RemoveAutofacLifetimeScopeAfterUseWhenExceptionThrown()
+    public async Task RemoveAutofacLifetimeScopeAfterUseWhenExceptionThrown()
     {
         var builder = new ContainerBuilder();
         builder.RegisterType<TestMiddleware>();
@@ -263,7 +263,7 @@ public class AutofacAppBuilderExtensionsFixture
     }
 
     [Fact]
-    public async void UseAutofacLifetimeScopeInjectorWithExternalScopeAddsItToOwinContext()
+    public async Task UseAutofacLifetimeScopeInjectorWithExternalScopeAddsItToOwinContext()
     {
         using var lifetimeScope = new TestableLifetimeScope();
         using (var server = TestServer.Create(app =>
@@ -279,7 +279,7 @@ public class AutofacAppBuilderExtensionsFixture
     }
 
     [Fact]
-    public async void UseAutofacLifetimeScopeInjectorWithExternalScopePassesOwinContextToTheProvider()
+    public async Task UseAutofacLifetimeScopeInjectorWithExternalScopePassesOwinContextToTheProvider()
     {
         using (var server = TestServer.Create(app =>
         {
@@ -296,7 +296,7 @@ public class AutofacAppBuilderExtensionsFixture
     }
 
     [Fact]
-    public async void UseAutofacLifetimeScopeInjectorWithExternalScopeDoesntDisposeIt()
+    public async Task UseAutofacLifetimeScopeInjectorWithExternalScopeDoesntDisposeIt()
     {
         using var lifetimeScope = new TestableLifetimeScope();
         using (var server = TestServer.Create(app =>
@@ -339,7 +339,7 @@ public class AutofacAppBuilderExtensionsFixture
     }
 
     [Fact]
-    public async void UseAutofacMiddlewareAddsChildLifetimeScopeToOwinContext()
+    public async Task UseAutofacMiddlewareAddsChildLifetimeScopeToOwinContext()
     {
         var builder = new ContainerBuilder();
         builder.RegisterType<TestMiddleware>();
@@ -408,7 +408,7 @@ public class AutofacAppBuilderExtensionsFixture
     }
 
     [Fact]
-    public async void UseAutofacLifetimeScopeInjectorWithContainerRegistersOwinContextInTheScope()
+    public async Task UseAutofacLifetimeScopeInjectorWithContainerRegistersOwinContextInTheScope()
     {
         using (var server = TestServer.Create(app =>
         {
@@ -428,7 +428,7 @@ public class AutofacAppBuilderExtensionsFixture
     }
 
     [Fact]
-    public async void UseAutofacLifetimeScopeInjectorWithExternalScopeDoesNotRegisterOwinContextInTheScope()
+    public async Task UseAutofacLifetimeScopeInjectorWithExternalScopeDoesNotRegisterOwinContextInTheScope()
     {
         using (var server = TestServer.Create(app =>
         {

@@ -83,7 +83,7 @@ public class OwinContextExtensionsFixture
     }
 
     [Fact]
-    public async void ScopeSetBySetAutofacLifetimeScopeIsNotDisposed()
+    public async Task ScopeSetBySetAutofacLifetimeScopeIsNotDisposed()
     {
         var lifetimeScope = Substitute.For<ILifetimeScope>();
         using (var server = TestServer.Create(app =>

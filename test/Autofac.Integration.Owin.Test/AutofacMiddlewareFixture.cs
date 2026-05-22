@@ -6,7 +6,7 @@ namespace Autofac.Integration.Owin.Test;
 public class AutofacMiddlewareFixture
 {
     [Fact]
-    public async void MiddlewareMustBeRegistered()
+    public async Task MiddlewareMustBeRegistered()
     {
         var builder = new ContainerBuilder();
         var container = builder.Build();
