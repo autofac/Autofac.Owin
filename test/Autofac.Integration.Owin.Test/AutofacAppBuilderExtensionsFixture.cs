@@ -500,7 +500,10 @@ public class AutofacAppBuilderExtensionsFixture
 
     private class TestableLifetimeScope : Disposable, ILifetimeScope
     {
-        public bool ScopeIsDisposed { get; set; }
+        public bool ScopeIsDisposed
+        {
+            get; set;
+        }
 
         public IDisposer Disposer => null;
 
