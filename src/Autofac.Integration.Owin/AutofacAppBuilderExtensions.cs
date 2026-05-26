@@ -20,7 +20,7 @@ public static class AutofacAppBuilderExtensions
     /// <summary>
     /// Unique key used to indicate the middleware for injecting the request lifetime scope has been registered with the application.
     /// </summary>
-    private static readonly string InjectorRegisteredKey = "AutofacLifetimeScopeInjectorRegistered:" + Constants.AutofacMiddlewareBoundary;
+    private static readonly string _injectorRegisteredKey = "AutofacLifetimeScopeInjectorRegistered:" + Constants.AutofacMiddlewareBoundary;
 
     /// <summary>
     /// Registers a callback to dispose an Autofac <see cref="ILifetimeScope"/>
@@ -88,7 +88,7 @@ public static class AutofacAppBuilderExtensions
             throw new ArgumentNullException(nameof(app));
         }
 
-        return app.Properties.ContainsKey(InjectorRegisteredKey);
+        return app.Properties.ContainsKey(_injectorRegisteredKey);
     }
 
     /// <summary>
@@ -393,7 +393,7 @@ public static class AutofacAppBuilderExtensions
             }
         });
 
-        app.Properties[InjectorRegisteredKey] = true;
+        app.Properties[_injectorRegisteredKey] = true;
         return app;
     }
 

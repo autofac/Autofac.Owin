@@ -26,13 +26,7 @@ internal class AutofacMiddleware<T> : OwinMiddleware
     /// <inheritdoc />
     public override Task Invoke(IOwinContext context)
     {
-        var lifetimeScope = context.GetAutofacLifetimeScope();
-        if (lifetimeScope == null)
-        {
-            // We pretty well protect against this, but just in case
-            // someone's trying to pull a fast one...
-            throw new InvalidOperationException(string.Format(CultureInfo.InvariantCulture, Resources.LifetimeScopeNotFoundWhileInjectingMiddleware, typeof(T)));
-        }
+        var lifetimeScope = context.GetAutofacLifetimeScope() ?? throw new InvalidOperationException(string.Format(CultureInfo.InvariantCulture, Resources.LifetimeScopeNotFoundWhileInjectingMiddleware, typeof(T)));
 
         T middleware;
         try
