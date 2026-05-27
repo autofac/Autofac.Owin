@@ -549,7 +549,7 @@ public class AutofacAppBuilderExtensionsFixture
             throw new NotImplementedException();
         }
 
-        public object ResolveComponent(ResolveRequest request)
+        public object ResolveComponent(in ResolveRequest request)
         {
             ResolveOperationBeginning(this, null);
             throw new NotImplementedException();
