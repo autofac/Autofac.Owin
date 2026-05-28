@@ -34,8 +34,8 @@ public class AutofacAppBuilderExtensionsFixture
         var app = new AppBuilder();
         using var scope = new TestableLifetimeScope();
 
-        // XUnit doesn't have Assert.DoesNotThrow
-        app.DisposeScopeOnAppDisposing(scope);
+        var exception = Record.Exception(() => app.DisposeScopeOnAppDisposing(scope));
+        Assert.Null(exception);
     }
 
     [Fact]
@@ -149,18 +149,22 @@ public class AutofacAppBuilderExtensionsFixture
     {
         var container = new ContainerBuilder().Build();
 
-        using (var server = TestServer.Create(app =>
+        var exception = await Record.ExceptionAsync(async () =>
         {
-            app.UseAutofacLifetimeScopeInjector(container);
+            using (var server = TestServer.Create(app =>
+            {
+                app.UseAutofacLifetimeScopeInjector(container);
 
-            // We don't expect anything to be called on this one, so we want it to fail.
-            var strictScope = Substitute.For<ILifetimeScope>();
-            app.UseAutofacLifetimeScopeInjector(strictScope);
-            app.Run(context => context.Response.WriteAsync("Hello, world!"));
-        }))
-        {
-            await server.HttpClient.GetAsync("/");
-        }
+                // We don't expect anything to be called on this one, so we want it to fail.
+                var strictScope = Substitute.For<ILifetimeScope>();
+                app.UseAutofacLifetimeScopeInjector(strictScope);
+                app.Run(context => context.Response.WriteAsync("Hello, world!"));
+            }))
+            {
+                await server.HttpClient.GetAsync("/");
+            }
+        });
+        Assert.Null(exception);
     }
 
     [Fact]

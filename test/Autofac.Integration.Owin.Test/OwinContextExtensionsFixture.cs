@@ -79,7 +79,8 @@ public class OwinContextExtensionsFixture
     public void RemoveAutofacLifetimeScopeDoesNotThrowIfScopeNotPresent()
     {
         var context = new OwinContext();
-        context.RemoveAutofacLifetimeScope();
+        var exception = Record.Exception(() => context.RemoveAutofacLifetimeScope());
+        Assert.Null(exception);
     }
 
     [Fact]
