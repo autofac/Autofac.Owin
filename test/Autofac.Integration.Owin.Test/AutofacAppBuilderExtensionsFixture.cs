@@ -17,7 +17,7 @@ public class AutofacAppBuilderExtensionsFixture
     public void DisposeScopeOnAppDisposing()
     {
         var app = new AppBuilder();
-        var tcs = new CancellationTokenSource();
+        using var tcs = new CancellationTokenSource();
         using var scope = new TestableLifetimeScope();
         app.Properties.Add("host.OnAppDisposing", tcs.Token);
 
@@ -98,7 +98,7 @@ public class AutofacAppBuilderExtensionsFixture
     }
 
     [Fact]
-    public async Task UseAutofacLifetimeScopeInjectorDoesntOverrideScopeSetBySetAutofacLifetimeScope()
+    public async Task UseAutofacLifetimeScopeInjectorDoesNotOverrideScopeSetBySetAutofacLifetimeScope()
     {
         using var lifetimeScope = new TestableLifetimeScope();
         using (var server = TestServer.Create(app =>
@@ -122,7 +122,7 @@ public class AutofacAppBuilderExtensionsFixture
     }
 
     [Fact]
-    public async Task UseAutofacLifetimeScopeInjectorDoesntDisposeScopeSetBySetAutofacLifetimeScope()
+    public async Task UseAutofacLifetimeScopeInjectorDoesNotDisposeScopeSetBySetAutofacLifetimeScope()
     {
         using var lifetimeScope = new TestableLifetimeScope();
         using (var server = TestServer.Create(app =>
@@ -145,7 +145,7 @@ public class AutofacAppBuilderExtensionsFixture
     }
 
     [Fact]
-    public async Task UseAutofacLifetimeScopeInjectorDoesntAddLifetimeScopeToOwinContextIfAlreadyPresent()
+    public async Task UseAutofacLifetimeScopeInjectorDoesNotAddLifetimeScopeToOwinContextIfAlreadyPresent()
     {
         var container = new ContainerBuilder().Build();
 
@@ -300,7 +300,7 @@ public class AutofacAppBuilderExtensionsFixture
     }
 
     [Fact]
-    public async Task UseAutofacLifetimeScopeInjectorWithExternalScopeDoesntDisposeIt()
+    public async Task UseAutofacLifetimeScopeInjectorWithExternalScopeDoesNotDisposeIt()
     {
         using var lifetimeScope = new TestableLifetimeScope();
         using (var server = TestServer.Create(app =>
@@ -316,7 +316,7 @@ public class AutofacAppBuilderExtensionsFixture
     }
 
     [Fact]
-    public void UseAutofacLifetimeScopeInjectorDoesntAddWrappedMiddlewareInstancesToAppBuilder()
+    public void UseAutofacLifetimeScopeInjectorDoesNotAddWrappedMiddlewareInstancesToAppBuilder()
     {
         var builder = new ContainerBuilder();
         builder.RegisterType<TestMiddleware>();
@@ -527,14 +527,14 @@ public class AutofacAppBuilderExtensionsFixture
 
         protected override void Dispose(bool disposing)
         {
-            CurrentScopeEnding?.Invoke(this, null);
+            CurrentScopeEnding?.Invoke(this, new LifetimeScopeEndingEventArgs(this));
             base.Dispose(disposing);
             ScopeIsDisposed = true;
         }
 
         public ILifetimeScope BeginLifetimeScope()
         {
-            ChildLifetimeScopeBeginning(this, null);
+            ChildLifetimeScopeBeginning(this, new LifetimeScopeBeginningEventArgs(this));
             throw new NotImplementedException();
         }
 
@@ -555,7 +555,7 @@ public class AutofacAppBuilderExtensionsFixture
 
         public object ResolveComponent(in ResolveRequest request)
         {
-            ResolveOperationBeginning(this, null);
+            ResolveOperationBeginning?.Invoke(this, new ResolveOperationBeginningEventArgs(null));
             throw new NotImplementedException();
         }
     }
