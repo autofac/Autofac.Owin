@@ -16,14 +16,14 @@ public class OwinContextExtensionsFixture
     [Fact]
     public void GetAutofacLifetimeScopeThrowsWhenProvidedNullInstance()
     {
-        var exception = Assert.Throws<ArgumentNullException>(() => OwinContextExtensions.GetAutofacLifetimeScope(null));
+        var exception = Assert.Throws<ArgumentNullException>(() => OwinContextExtensions.GetAutofacLifetimeScope(null!));
         Assert.Equal("context", exception.ParamName);
     }
 
     [Fact]
     public void RemoveAutofacLifetimeScopeThrowsWhenProvidedNullInstance()
     {
-        var exception = Assert.Throws<ArgumentNullException>(() => OwinContextExtensions.RemoveAutofacLifetimeScope(null));
+        var exception = Assert.Throws<ArgumentNullException>(() => OwinContextExtensions.RemoveAutofacLifetimeScope(null!));
         Assert.Equal("context", exception.ParamName);
     }
 
@@ -40,14 +40,14 @@ public class OwinContextExtensionsFixture
     [Fact]
     public void SetAutofacLifetimeScopeThrowsWhenProvidedNullContextInstance()
     {
-        var exception = Assert.Throws<ArgumentNullException>(() => OwinContextExtensions.SetAutofacLifetimeScope(null, Substitute.For<ILifetimeScope>()));
+        var exception = Assert.Throws<ArgumentNullException>(() => OwinContextExtensions.SetAutofacLifetimeScope(null!, Substitute.For<ILifetimeScope>()));
         Assert.Equal("context", exception.ParamName);
     }
 
     [Fact]
     public void SetAutofacLifetimeScopeThrowsWhenProvidedNullScopeInstance()
     {
-        var exception = Assert.Throws<ArgumentNullException>(() => OwinContextExtensions.SetAutofacLifetimeScope(new OwinContext(), null));
+        var exception = Assert.Throws<ArgumentNullException>(() => OwinContextExtensions.SetAutofacLifetimeScope(new OwinContext(), null!));
         Assert.Equal("scope", exception.ParamName);
     }
 

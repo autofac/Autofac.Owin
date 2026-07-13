@@ -42,13 +42,13 @@ public class AutofacAppBuilderExtensionsFixture
     public void DisposeScopeOnAppDisposingLifetimeScopeRequired()
     {
         var app = new AppBuilder();
-        Assert.Throws<ArgumentNullException>(() => app.DisposeScopeOnAppDisposing(null));
+        Assert.Throws<ArgumentNullException>(() => app.DisposeScopeOnAppDisposing(null!));
     }
 
     [Fact]
     public void DisposeScopeOnAppDisposingAppBuildRequired()
     {
-        var app = (IAppBuilder)null;
+        var app = (IAppBuilder)null!;
         Assert.Throws<ArgumentNullException>(() => app.DisposeScopeOnAppDisposing(new TestableLifetimeScope()));
     }
 
@@ -93,7 +93,7 @@ public class AutofacAppBuilderExtensionsFixture
             }))
         {
             await server.HttpClient.GetAsync("/");
-            Assert.Equal(MatchingScopeLifetimeTags.RequestLifetimeScopeTag, TestMiddleware.LifetimeScope.Tag);
+            Assert.Equal(MatchingScopeLifetimeTags.RequestLifetimeScopeTag, TestMiddleware.LifetimeScope!.Tag);
         }
     }
 
@@ -356,7 +356,7 @@ public class AutofacAppBuilderExtensionsFixture
             }))
         {
             await server.HttpClient.GetAsync("/");
-            Assert.Equal(MatchingScopeLifetimeTags.RequestLifetimeScopeTag, TestMiddleware.LifetimeScope.Tag);
+            Assert.Equal(MatchingScopeLifetimeTags.RequestLifetimeScopeTag, TestMiddleware.LifetimeScope!.Tag);
         }
     }
 
@@ -509,21 +509,21 @@ public class AutofacAppBuilderExtensionsFixture
             get; set;
         }
 
-        public IDisposer Disposer => null;
+        public IDisposer Disposer => null!;
 
-        public object Tag => null;
+        public object Tag => null!;
 
-        public IComponentRegistry ComponentRegistry => null;
+        public IComponentRegistry ComponentRegistry => null!;
 
         public TestableLifetimeScope()
         {
         }
 
-        public event EventHandler<LifetimeScopeBeginningEventArgs> ChildLifetimeScopeBeginning;
+        public event EventHandler<LifetimeScopeBeginningEventArgs>? ChildLifetimeScopeBeginning;
 
-        public event EventHandler<LifetimeScopeEndingEventArgs> CurrentScopeEnding;
+        public event EventHandler<LifetimeScopeEndingEventArgs>? CurrentScopeEnding;
 
-        public event EventHandler<ResolveOperationBeginningEventArgs> ResolveOperationBeginning;
+        public event EventHandler<ResolveOperationBeginningEventArgs>? ResolveOperationBeginning;
 
         protected override void Dispose(bool disposing)
         {
@@ -534,7 +534,7 @@ public class AutofacAppBuilderExtensionsFixture
 
         public ILifetimeScope BeginLifetimeScope()
         {
-            ChildLifetimeScopeBeginning(this, new LifetimeScopeBeginningEventArgs(this));
+            ChildLifetimeScopeBeginning?.Invoke(this, new LifetimeScopeBeginningEventArgs(this));
             throw new NotImplementedException();
         }
 
@@ -555,7 +555,7 @@ public class AutofacAppBuilderExtensionsFixture
 
         public object ResolveComponent(in ResolveRequest request)
         {
-            ResolveOperationBeginning?.Invoke(this, new ResolveOperationBeginningEventArgs(null));
+            ResolveOperationBeginning?.Invoke(this, new ResolveOperationBeginningEventArgs(null!));
             throw new NotImplementedException();
         }
     }

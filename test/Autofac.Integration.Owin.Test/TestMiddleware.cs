@@ -11,7 +11,7 @@ public class TestMiddleware : OwinMiddleware
         LifetimeScope = null;
     }
 
-    public static ILifetimeScope LifetimeScope
+    public static ILifetimeScope? LifetimeScope
     {
         get; set;
     }
