@@ -2,7 +2,7 @@
 
 ASP.NET OWIN integration for [Autofac](https://autofac.org).
 
-[![Build status](https://github.com/autofac/Autofac.Owin/actions/workflows/ci.yml/badge.svg?branch=develop)](https://github.com/autofac/Autofac.Owin/actions/workflows/ci.yml)
+[![Build status](https://github.com/autofac/Autofac.Owin/actions/workflows/main.yml/badge.svg)](https://github.com/autofac/Autofac.Owin/actions/workflows/main.yml) [![codecov](https://codecov.io/gh/Autofac/Autofac.Owin/branch/develop/graph/badge.svg)](https://codecov.io/gh/Autofac/Autofac.Owin) [![NuGet](https://img.shields.io/nuget/v/Autofac.Owin.svg)](https://nuget.org/packages/Autofac.Owin)
 
 Please file issues and pull requests for this package [in this repository](https://github.com/autofac/Autofac.Owin/issues) rather than in the Autofac core repo.
 
@@ -19,7 +19,7 @@ To take advantage of Autofac in your OWIN pipeline:
 - Build your Autofac container.
 - Register the Autofac middleware with OWIN and pass it the container.
 
-```c#
+```csharp
 public class Startup
 {
   public void Configuration(IAppBuilder app)
